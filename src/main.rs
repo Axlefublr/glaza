@@ -21,13 +21,17 @@ fn main() {
 			ShowCommands::Set { action } => match action {
 				SetActions::Download { show, episode } => {
 					shows_model::change_downloaded(&mut shows_model, &show, episode);
+					shows_model::save(shows_model, &data.shows);
 				}
 				SetActions::Episode { show, episode } => {
 					shows_model::change_episode(&mut shows_model, &show, episode);
+					shows_model::save(shows_model, &data.shows);
+					// todo: commits are done after a singular save at the end by setting a variable to a variant of an enum or smth
 					git::add_commit(&data.floral_barrel, &data.shows, format!("watch ep{episode} -> {show}"));
 				}
 				SetActions::Link { show, link } => {
 					shows_model::change_link(&mut shows_model, &show, link);
+					shows_model::save(shows_model, &data.shows);
 				}
 			},
 			ShowCommands::Watch { show } => {}
@@ -36,5 +40,4 @@ fn main() {
 		},
 		UserCommands::Wl { action } => {}
 	};
-	shows_model::save(shows_model, &data.shows);
 }
