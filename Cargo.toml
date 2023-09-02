@@ -13,3 +13,4 @@ repository = "https://github.com/Axlefublr/floral_barrel"
 
 [dependencies]
 clap = { version = "4.4.1", features = ["derive"] }
+dirs = "5.0.1"
