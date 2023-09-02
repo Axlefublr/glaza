@@ -1,10 +1,12 @@
+use serde::Deserialize;
+use serde::Serialize;
+use serde_json::ser::Serializer;
+use serde_json::ser::PrettyFormatter;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
-use serde::Deserialize;
-use serde::Serialize;
 
 pub type Shows = HashMap<String, Show>;
 
@@ -12,7 +14,7 @@ pub type Shows = HashMap<String, Show>;
 pub struct Show {
 	pub episode: u32,
 	pub downloaded: u32,
-	pub link: String
+	pub link: String,
 }
 
 pub fn new(file_path: &Path) -> Shows {
@@ -34,6 +36,9 @@ pub fn change_link(shows: &mut Shows, show_name: &str, new_link: String) {
 }
 
 pub fn save(shows_model: Shows, shows_path: &Path) {
-	let json = serde_json::to_string_pretty(&shows_model).unwrap();
-	fs::write(shows_path, json.as_bytes()).unwrap();
+	let formatter = PrettyFormatter::with_indent(b"	"); // tab
+	let mut vec = Vec::new();
+	let mut serializer = Serializer::with_formatter(&mut vec, formatter);
+	shows_model.serialize(&mut serializer).unwrap();
+	fs::write(shows_path, vec).unwrap();
 }
