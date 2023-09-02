@@ -1,28 +1,25 @@
 use clap::Parser;
 use clap::Subcommand;
-use crate::list::ListCommands;
-use crate::set::SetCommands;
 use crate::show::ShowCommands;
+use crate::wl::WlCommands;
 
 #[derive(Parser)]
-#[command(author, about, next_line_help = true)]
+#[command(author, about)]
 pub struct Args {
 	#[command(subcommand)]
 	pub action: UserCommands
 }
 
-#[derive(Subcommand, Clone, Copy)]
+#[derive(Subcommand)]
 pub enum UserCommands {
+	/// Commands to interact with the shows you're currently watching or have watched
 	Show {
 		#[command(subcommand)]
 		action: ShowCommands
 	},
-	Set {
+	/// Commands to interact with your "Watch later" list
+	Wl {
 		#[command(subcommand)]
-		action: SetCommands
-	},
-	List {
-		#[command(subcommand)]
-		action: ListCommands
+		action: WlCommands
 	}
 }
