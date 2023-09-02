@@ -1,4 +1,5 @@
 use dirs;
+use std::fs;
 use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
@@ -15,10 +16,11 @@ fn get_floral_barrel_dir() -> PathBuf {
 
 fn create(parent_buf: &Path, file_path: &str) -> PathBuf {
 	let file = parent_buf.join(file_path);
-	File::create(&file).unwrap();
+	// todo! create file
 	file
 }
 
+#[derive(Debug)]
 pub struct DataFiles {
 	pub shows: PathBuf,
 	pub watched: PathBuf,

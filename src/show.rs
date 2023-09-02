@@ -57,5 +57,11 @@ pub enum SetActions {
 		show: String,
 		#[arg(short, long)]
 		episode: u32
+	},
+	Link {
+		#[arg(short, long)]
+		show: String,
+		#[arg(short, long)]
+		link: String
 	}
 }
