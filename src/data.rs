@@ -4,6 +4,7 @@ use std::fs::File;
 use std::path::Path;
 use std::path::PathBuf;
 
+const EMPTY_JSON_OBJECT: &str = r"{}";
 const DATA_DIR: &str = "floral_barrel";
 const SHOWS_FILE: &str = "shows.json";
 const WATCHED_FILE: &str = "watched.txt";
@@ -49,5 +50,15 @@ impl DataFiles {
 			watch_later,
 			floral_barrel,
 		}
+	}
+
+	pub fn create(&self) -> Result<(), String> {
+		if fs::create_dir_all(&self.floral_barrel).is_err() {
+			return Err(format!("couldn't create {}", &self.floral_barrel.display()));
+		}
+		ensure_exists(&self.shows, EMPTY_JSON_OBJECT)?;
+		ensure_exists(&self.watched, "")?;
+		ensure_exists(&self.watch_later, "")?;
+		Ok(())
 	}
 }

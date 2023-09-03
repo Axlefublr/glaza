@@ -1,3 +1,5 @@
+use std::process::ExitCode;
+
 use crate::args::Args;
 use args::UserCommands;
 use clap::Parser;
@@ -12,9 +14,13 @@ mod show;
 mod shows_model;
 mod wl;
 
-fn main() {
+fn main() -> ExitCode {
 	let args = Args::parse();
-	let data = DataFiles::create();
+	let data = DataFiles::new();
+	if let Err(message) = data.create() {
+		eprintln!("{}", message);
+		return ExitCode::FAILURE;
+	}
 	let mut shows_model = shows_model::new(&data.shows);
 	match args.action {
 		UserCommands::Show { action } => match action {
@@ -44,4 +50,5 @@ fn main() {
 		},
 		UserCommands::Wl { action } => {}
 	};
+	ExitCode::SUCCESS
 }
