@@ -6,6 +6,7 @@ use clap::Parser;
 use data::DataFiles;
 use show::SetActions;
 use show::ShowCommands;
+use shows_model::ShowsRepo;
 
 mod args;
 mod data;
@@ -21,17 +22,23 @@ fn main() -> ExitCode {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
-	let mut shows_model = shows_model::new(&data.shows);
+	let mut shows_model = match ShowsRepo::new(&data.shows) {
+		Ok(shows_model) => shows_model,
+		Err(message) => {
+			eprintln!("{}", message);
+			return ExitCode::FAILURE
+		}
+	};
 	match args.action {
 		UserCommands::Show { action } => match action {
 			ShowCommands::Set { action } => match action {
 				SetActions::Download { show, episode } => {
-					shows_model::change_downloaded(&mut shows_model, &show, episode);
-					shows_model::save(shows_model, &data.shows);
+					shows_model.change_downloaded(&show, episode);
+					shows_model.save();
 				}
 				SetActions::Episode { show, episode } => {
-					shows_model::change_episode(&mut shows_model, &show, episode);
-					shows_model::save(shows_model, &data.shows);
+					shows_model.change_episode(&show, episode);
+					shows_model.save();
 					// todo: commits are done after a singular save at the end by setting a variable to a variant of an enum or smth
 					git::git_add_commit(
 						&data.floral_barrel,
@@ -40,8 +47,8 @@ fn main() -> ExitCode {
 					);
 				}
 				SetActions::Link { show, link } => {
-					shows_model::change_link(&mut shows_model, &show, link);
-					shows_model::save(shows_model, &data.shows);
+					shows_model.change_link(&show, link);
+					shows_model.save();
 				}
 			},
 			ShowCommands::Watch { show } => {}
