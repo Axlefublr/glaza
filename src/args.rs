@@ -6,20 +6,20 @@ use clap::Subcommand;
 #[derive(Parser)]
 #[command(author, about)]
 pub struct Args {
-    #[command(subcommand)]
-    pub action: UserCommands,
+	#[command(subcommand)]
+	pub action: UserCommands,
 }
 
 #[derive(Subcommand)]
 pub enum UserCommands {
-    /// Commands to interact with the shows you're currently watching or have watched
-    Show {
-        #[command(subcommand)]
-        action: ShowCommands,
-    },
-    /// Commands to interact with your "Watch later" list
-    Wl {
-        #[command(subcommand)]
-        action: WlCommands,
-    },
+	/// Commands to interact with the shows you're currently watching or have watched
+	Show {
+		#[command(subcommand)]
+		action: ShowCommands,
+	},
+	/// Commands to interact with your "Watch later" list
+	Wl {
+		#[command(subcommand)]
+		action: WlCommands,
+	},
 }
