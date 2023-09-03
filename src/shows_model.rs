@@ -21,16 +21,14 @@ pub struct Show {
 pub struct ShowsRepo {
 	pub shows: Shows,
 	pub file_path: PathBuf,
-	pub indent: String,
 }
 
 impl ShowsRepo {
-	pub fn new(file_path: &Path, indent: String) -> Result<Self, &'static str> {
+	pub fn new(file_path: &Path) -> Result<Self, &'static str> {
 		let shows = parse(file_path)?;
 		Ok(Self {
 			shows,
 			file_path: file_path.to_path_buf(),
-			indent,
 		})
 	}
 
@@ -61,7 +59,7 @@ impl ShowsRepo {
 	}
 
 	pub fn save(self) -> Result<(), &'static str> {
-		let formatter = PrettyFormatter::with_indent(self.indent.as_bytes()); // todo: program flag to override json indentation
+		let formatter = PrettyFormatter::with_indent(b"	"); // todo: program flag to override json indentation
 		let mut data = Vec::new();
 		let mut serializer = Serializer::with_formatter(&mut data, formatter);
 		if self.shows.serialize(&mut serializer).is_err() {

@@ -22,7 +22,7 @@ fn main() -> ExitCode {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
-	let mut shows_model = match ShowsRepo::new(&data.shows, args.indent) {
+	let mut shows_model = match ShowsRepo::new(&data.shows) {
 		Ok(shows_model) => shows_model,
 		Err(message) => {
 			eprintln!("{}", message);
