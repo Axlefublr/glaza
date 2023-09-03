@@ -33,7 +33,7 @@ fn main() -> ExitCode {
 					shows_model::change_episode(&mut shows_model, &show, episode);
 					shows_model::save(shows_model, &data.shows);
 					// todo: commits are done after a singular save at the end by setting a variable to a variant of an enum or smth
-					git::add_commit(
+					git::git_add_commit(
 						&data.floral_barrel,
 						&data.shows,
 						format!("watch ep{episode} -> {show}"),
