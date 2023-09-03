@@ -26,36 +26,63 @@ fn main() -> ExitCode {
 		Ok(shows_model) => shows_model,
 		Err(message) => {
 			eprintln!("{}", message);
-			return ExitCode::FAILURE
+			return ExitCode::FAILURE;
 		}
 	};
-	match args.action {
+	return match args.action {
 		UserCommands::Show { action } => match action {
 			ShowCommands::Set { action } => match action {
 				SetActions::Download { show, episode } => {
-					shows_model.change_downloaded(&show, episode);
-					shows_model.save();
+					if let Err(message) = shows_model.change_downloaded(&show, episode) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					};
+					match shows_model.save() {
+						Err(message) => {
+							eprintln!("{}", message);
+							ExitCode::FAILURE
+						}
+						Ok(()) => ExitCode::SUCCESS,
+					}
 				}
 				SetActions::Episode { show, episode } => {
-					shows_model.change_episode(&show, episode);
-					shows_model.save();
+					if let Err(message) = shows_model.change_episode(&show, episode) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					};
+					if let Err(message) = shows_model.save() {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					}
 					// todo: commits are done after a singular save at the end by setting a variable to a variant of an enum or smth
-					git::git_add_commit(
+					if let Err(message) = git::git_add_commit(
 						&data.floral_barrel,
 						&data.shows,
 						format!("watch ep{episode} -> {show}"),
-					);
+					) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					}
+					ExitCode::SUCCESS
 				}
 				SetActions::Link { show, link } => {
-					shows_model.change_link(&show, link);
-					shows_model.save();
+					if let Err(message) = shows_model.change_link(&show, link) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					};
+					match shows_model.save() {
+						Err(message) => {
+							eprintln!("{}", message);
+							ExitCode::FAILURE
+						}
+						Ok(()) => ExitCode::SUCCESS,
+					}
 				}
 			},
-			ShowCommands::Watch { show } => {}
-			ShowCommands::Download { show } => {}
-			_ => (),
+			ShowCommands::Watch { show } => unimplemented!(),
+			ShowCommands::Download { show } => unimplemented!(),
+			_ => unimplemented!(),
 		},
-		UserCommands::Wl { action } => {}
+		UserCommands::Wl { action } => unimplemented!(),
 	};
-	ExitCode::SUCCESS
 }
