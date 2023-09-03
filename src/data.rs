@@ -14,10 +14,19 @@ fn get_floral_barrel_dir() -> PathBuf {
 	data_dir.join(DATA_DIR)
 }
 
-fn create(parent_buf: &Path, file_path: &str) -> PathBuf {
-	let file = parent_buf.join(file_path);
-	// todo! create file
-	file
+fn file_exists(file_path: &Path) -> bool {
+	let metadata = fs::metadata(file_path);
+	metadata.is_ok() && metadata.unwrap().is_file()
+}
+
+fn ensure_exists(file_path: &Path, contents: &str) -> Result<(), String> {
+	if file_exists(file_path) {
+		return Ok(());
+	}
+	if fs::write(file_path, contents).is_err() {
+		return Err(format!("failed to create file {}", file_path.display()));
+	}
+	Ok(())
 }
 
 #[derive(Debug)]
@@ -29,11 +38,11 @@ pub struct DataFiles {
 }
 
 impl DataFiles {
-	pub fn create() -> Self {
+	pub fn new() -> Self {
 		let floral_barrel = get_floral_barrel_dir();
-		let shows = create(&floral_barrel, SHOWS_FILE);
-		let watched = create(&floral_barrel, WATCHED_FILE);
-		let watch_later = create(&floral_barrel, WATCH_LATER_FILE);
+		let shows = floral_barrel.join(SHOWS_FILE);
+		let watched = floral_barrel.join(WATCHED_FILE);
+		let watch_later = floral_barrel.join(WATCH_LATER_FILE);
 		Self {
 			shows,
 			watched,
