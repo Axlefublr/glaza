@@ -59,7 +59,7 @@ impl ShowsRepo {
 	}
 
 	pub fn save(self) -> Result<(), &'static str> {
-		let formatter = PrettyFormatter::with_indent(b"	"); // todo: program flag to override json indentation
+		let formatter = PrettyFormatter::with_indent(b"	");
 		let mut data = Vec::new();
 		let mut serializer = Serializer::with_formatter(&mut data, formatter);
 		if self.shows.serialize(&mut serializer).is_err() {
