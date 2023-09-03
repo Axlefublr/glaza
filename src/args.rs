@@ -8,6 +8,9 @@ use clap::Subcommand;
 pub struct Args {
 	#[command(subcommand)]
 	pub action: UserCommands,
+	/// Indentation you want to use for your shows.json file
+	#[arg(long, default_value_t = String::from("	"))]
+	pub indent: String,
 }
 
 #[derive(Subcommand)]

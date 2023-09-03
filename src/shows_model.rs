@@ -9,8 +9,6 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
-const JSON_INDENT: &[u8] = b"	";
-
 type Shows = HashMap<String, Show>;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -22,19 +20,24 @@ pub struct Show {
 
 pub struct ShowsRepo {
 	pub shows: Shows,
-	pub file_path: PathBuf
+	pub file_path: PathBuf,
+	pub indent: String,
 }
 
 impl ShowsRepo {
-	pub fn new(file_path: &Path) -> Result<Self, &'static str> {
+	pub fn new(file_path: &Path, indent: String) -> Result<Self, &'static str> {
 		let shows = parse(file_path)?;
-		Ok(Self { shows, file_path: file_path.to_path_buf() })
+		Ok(Self {
+			shows,
+			file_path: file_path.to_path_buf(),
+			indent,
+		})
 	}
 
 	fn get_mut_show(&mut self, show_name: &str) -> Result<&mut Show, String> {
 		match self.shows.get_mut(show_name) {
 			Some(show) => Ok(show),
-			None => Err(format!("couldn't find show {show_name} in shows model"))
+			None => Err(format!("couldn't find show {show_name} in shows model")),
 		}
 	}
 
@@ -43,7 +46,11 @@ impl ShowsRepo {
 		Ok(())
 	}
 
-	pub fn change_downloaded(&mut self, show_name: &str, new_downloaded: u32) -> Result<(), String> {
+	pub fn change_downloaded(
+		&mut self,
+		show_name: &str,
+		new_downloaded: u32,
+	) -> Result<(), String> {
 		self.get_mut_show(show_name)?.downloaded = new_downloaded;
 		Ok(())
 	}
@@ -54,28 +61,27 @@ impl ShowsRepo {
 	}
 
 	pub fn save(self) -> Result<(), &'static str> {
-		let formatter = PrettyFormatter::with_indent(JSON_INDENT); // todo: program flag to override json indentation
+		let formatter = PrettyFormatter::with_indent(self.indent.as_bytes()); // todo: program flag to override json indentation
 		let mut data = Vec::new();
 		let mut serializer = Serializer::with_formatter(&mut data, formatter);
 		if self.shows.serialize(&mut serializer).is_err() {
 			return Err("couldn't serialize shows model into json");
 		};
 		if fs::write(self.file_path, data).is_err() {
-			return Err("failed to write to shows.json")
+			return Err("failed to write to shows.json");
 		}
 		Ok(())
 	}
-
 }
 
 fn parse(file_path: &Path) -> Result<Shows, &'static str> {
 	let file = match File::open(file_path) {
 		Ok(file) => file,
-		Err(_) => return Err("couldn't open the shows file for reading")
+		Err(_) => return Err("couldn't open the shows file for reading"),
 	};
 	let reader = BufReader::new(file);
 	match serde_json::from_reader(reader) {
 		Ok(model) => Ok(model),
-		Err(_) => Err("couldn't parse shows.json into model")
+		Err(_) => Err("couldn't parse shows.json into model"),
 	}
 }

@@ -22,7 +22,7 @@ fn main() -> ExitCode {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
-	let mut shows_model = match ShowsRepo::new(&data.shows) {
+	let mut shows_model = match ShowsRepo::new(&data.shows, args.indent) {
 		Ok(shows_model) => shows_model,
 		Err(message) => {
 			eprintln!("{}", message);
@@ -79,10 +79,11 @@ fn main() -> ExitCode {
 					}
 				}
 			},
-			ShowCommands::Watch { show } => unimplemented!(),
-			ShowCommands::Download { show } => unimplemented!(),
+			// ShowCommands::Watch { show } => unimplemented!(),
+			// ShowCommands::Download { show } => unimplemented!(),
 			_ => unimplemented!(),
 		},
-		UserCommands::Wl { action } => unimplemented!(),
+		// UserCommands::Wl { action } => unimplemented!(),
+		_ => unimplemented!(),
 	};
 }
