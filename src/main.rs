@@ -42,6 +42,7 @@ fn main() -> ExitCode {
 		UserCommands::Show { action } => match action {
 			ShowCommands::Set { action } => match action {
 				SetActions::Download { show, episode } => {
+					// todo: impl of Result<smth, &'static str> to unwrap the error and write to stderr, and return the exitcode
 					if let Err(message) = shows_model.change_downloaded(&show, episode) {
 						eprintln!("{}", message);
 						return ExitCode::FAILURE;

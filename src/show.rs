@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
 #[derive(Subcommand)]
-#[command(next_line_help = true)]
+// #[command(next_line_help = true)]
 pub enum ShowCommands {
 	/// Print the link of a show you're currently watching to stdout.
 	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set episode` + 1, effectively resulting in "print the next episode's link".
@@ -9,16 +9,17 @@ pub enum ShowCommands {
 		#[arg(short, long)]
 		show: String,
 		/// Open the link in your $BROWSER instead of printing it to stdout
-		#[arg(short, long, default_value_t = false)]
+		#[arg(short, long)]
 		open: bool
 	},
 	/// Print the link of a show you're currently watching to stdout, for downloading.
 	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set download` + 1, effectively resulting in "print the download link for the next episode"
+	#[command(visible_alias = "dn")]
 	Download {
 		#[arg(short, long)]
 		show: String,
 		/// Open the link in your $BROWSER instead of printing it to stdout
-		#[arg(short, long, default_value_t = false)]
+		#[arg(short, long)]
 		open: bool
 	},
 	/// Print the link of a show to stdout.
@@ -28,7 +29,7 @@ pub enum ShowCommands {
 		#[arg(short, long)]
 		show: String,
 		/// Open the link in your $BROWSER instead of printing it to stdout
-		#[arg(short, long, default_value_t = false)]
+		#[arg(short, long)]
 		open: bool
 	},
 	/// Finish a show, putting it in your watched list with the date of finishing.
@@ -51,13 +52,14 @@ pub enum ShowCommands {
 	},
 	/// List all the shows you're currently watching in the format of `showName - ep99 - dn99`
 	List {
-		#[arg(short, long, default_value_t = false)]
+		#[arg(short, long)]
 		links: bool,
 	},
 	/// Print the entirety of the watched file, effectively showing all shows you've ever watched.
 	Past,
 	/// Removes a show from the list without making a commit or moving it to your watchlist.
 	/// Helpful for when you accidentally added a show you didn't intend to.
+	#[command(visible_alias = "rm")]
 	Remove {
 		#[arg(short, long)]
 		show: String,
@@ -71,14 +73,18 @@ pub enum ShowCommands {
 
 #[derive(Subcommand)]
 pub enum SetActions {
+	// todo: alias to ep
 	/// Set the episode you just watched of a show
+	#[command(visible_alias = "ep")]
 	Episode {
 		#[arg(short, long)]
 		show: String,
 		#[arg(short, long)]
 		episode: u32,
 	},
+	// todo: alias to dn
 	/// Set the episode you just downloaded of a show
+	#[command(visible_alias = "dn")]
 	Download {
 		#[arg(short, long)]
 		show: String,

@@ -3,8 +3,11 @@ use crate::wl::WlCommands;
 use clap::Parser;
 use clap::Subcommand;
 
+#[cfg(test)]
+mod tests;
+
 #[derive(Parser)]
-#[command(author, about)]
+#[command(author, version, about)]
 pub struct Args {
 	#[command(subcommand)]
 	pub action: UserCommands,
