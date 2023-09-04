@@ -77,6 +77,12 @@ impl ShowsRepo {
 		Ok(())
 	}
 
+	pub fn print_link(&self, show_name: &str) -> Result<(), String> {
+		let show = self.get_show(show_name)?;
+		println!("{}", show.link);
+		Ok(())
+	}
+
 	pub fn save(self) -> Result<(), &'static str> {
 		let formatter = PrettyFormatter::with_indent(b"	");
 		let mut data = Vec::new();

@@ -93,6 +93,13 @@ fn main() -> ExitCode {
 				}
 				ExitCode::SUCCESS
 			}
+			ShowCommands::Link { show } => {
+				if let Err(message) = shows_model.print_link(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
 			_ => unimplemented!(),
 		},
 		// UserCommands::Wl { action } => unimplemented!(),

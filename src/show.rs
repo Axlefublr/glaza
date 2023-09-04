@@ -17,7 +17,10 @@ pub enum ShowCommands {
 	/// Print the link of a show to stdout.
 	/// Compared to `show watch` and `show download`, no useful magic is done.
 	/// This is useful for streaming services that don't conveniently have the episode number as the last thing in the link.
-	Link {},
+	Link {
+		#[arg(short, long)]
+		show: String,
+	},
 	/// Finish a show, putting it in your watched list with the date of finishing.
 	Finish {},
 	/// Drop a show, putting it in your watched list tagged as dropped, with the date of dropping.
