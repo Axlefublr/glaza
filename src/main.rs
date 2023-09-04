@@ -155,7 +155,24 @@ fn main() -> ExitCode {
 				}
 				ExitCode::SUCCESS
 			}
-			_ => unimplemented!(),
+			ShowCommands::Past => {
+				if let Err(message) = watched_model.read() {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
+			ShowCommands::Remove { show } => {
+				if let Err(message) = shows_model.remove(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				};
+				if let Err(message) = shows_model.save() {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
 		},
 		// UserCommands::Wl { action } => unimplemented!(),
 		_ => unimplemented!(),

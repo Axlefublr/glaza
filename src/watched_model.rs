@@ -1,6 +1,7 @@
 use chrono::Utc;
 use std::fs::File;
 use std::fs::OpenOptions;
+use std::io::Read;
 use std::io::Write;
 use std::path::Path;
 
@@ -12,6 +13,15 @@ impl WatchedRepo {
 	pub fn new(file_path: &Path) -> Result<Self, &'static str> {
 		let file = parse(file_path)?;
 		Ok(Self { file })
+	}
+
+	pub fn read(&mut self) -> Result<(), &'static str> {
+		let mut contents = String::new();
+		if self.file.read_to_string(&mut contents).is_err() {
+			return Err("couldn't read watched file");
+		}
+		println!("{}", contents.trim_end());
+		Ok(())
 	}
 
 	fn append_show(&mut self, text: &str) -> Result<(), &'static str> {
@@ -32,7 +42,7 @@ impl WatchedRepo {
 }
 
 fn parse(file_path: &Path) -> Result<File, &'static str> {
-	match OpenOptions::new().append(true).open(file_path) {
+	match OpenOptions::new().append(true).read(true).open(file_path) {
 		Ok(file) => Ok(file),
 		Err(_) => Err("couldn't open the watched file for appending"),
 	}

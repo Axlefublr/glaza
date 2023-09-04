@@ -4,7 +4,7 @@ use std::process::Command;
 pub fn git_add_commit(working_dir: &Path, message: String) -> Result<(), &'static str> {
 	if Command::new("git")
 		.arg("add")
-		.arg(".")
+		.arg(".") // todo: "files" vec, to only stage shows on episode, finish, and drop changes
 		.current_dir(working_dir)
 		.output()
 		.is_err()

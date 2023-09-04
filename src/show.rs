@@ -1,6 +1,7 @@
 use clap::Subcommand;
 
 #[derive(Subcommand)]
+#[command(next_line_help = true)]
 pub enum ShowCommands {
 	/// Print the link of a show you're currently watching to stdout.
 	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set episode` + 1, effectively resulting in "print the next episode's link".
@@ -42,7 +43,13 @@ pub enum ShowCommands {
 	/// List all the shows you're currently watching in the format of `showName - ep99 - dn99`
 	List,
 	/// Print the entirety of the watched file, effectively showing all shows you've ever watched.
-	Past {},
+	Past,
+	/// Removes a show from the list without making a commit or moving it to your watchlist.
+	/// Helpful for when you accidentally added a show you didn't intend to.
+	Remove {
+		#[arg(short, long)]
+		show: String,
+	},
 	/// Update how many episodes of a show you're currently watching you've watched / downloaded.
 	Set {
 		#[command(subcommand)]
