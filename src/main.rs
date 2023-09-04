@@ -1,18 +1,20 @@
-use std::process::ExitCode;
-
 use crate::args::Args;
 use args::UserCommands;
 use clap::Parser;
 use data::DataFiles;
+use git::git_add_commit;
 use show::SetActions;
 use show::ShowCommands;
 use shows_model::ShowsRepo;
+use std::process::ExitCode;
+use watched_model::WatchedRepo;
 
 mod args;
 mod data;
 mod git;
 mod show;
 mod shows_model;
+mod watched_model;
 mod wl;
 
 fn main() -> ExitCode {
@@ -24,6 +26,13 @@ fn main() -> ExitCode {
 	}
 	let mut shows_model = match ShowsRepo::new(&data.shows) {
 		Ok(shows_model) => shows_model,
+		Err(message) => {
+			eprintln!("{}", message);
+			return ExitCode::FAILURE;
+		}
+	};
+	let mut watched_model = match WatchedRepo::new(&data.watched) {
+		Ok(watched_model) => watched_model,
 		Err(message) => {
 			eprintln!("{}", message);
 			return ExitCode::FAILURE;
@@ -55,11 +64,9 @@ fn main() -> ExitCode {
 						return ExitCode::FAILURE;
 					}
 					// todo: commits are done after a singular save at the end by setting a variable to a variant of an enum or smth
-					if let Err(message) = git::git_add_commit(
-						&data.floral_barrel,
-						&data.shows,
-						format!("watch ep{episode} -> {show}"),
-					) {
+					if let Err(message) =
+						git_add_commit(&data.floral_barrel, format!("watch ep{episode} -> {show}"))
+					{
 						eprintln!("{}", message);
 						return ExitCode::FAILURE;
 					}
@@ -95,6 +102,39 @@ fn main() -> ExitCode {
 			}
 			ShowCommands::Link { show } => {
 				if let Err(message) = shows_model.print_link(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
+			ShowCommands::Finish { show } => {
+				let _ = shows_model.remove(&show);
+				if let Err(message) = shows_model.save() {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				if let Err(message) = watched_model.finish(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				if let Err(message) = git_add_commit(&data.floral_barrel, format!("finish {show}"))
+				{
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
+			ShowCommands::Drop { show } => {
+				let _ = shows_model.remove(&show);
+				if let Err(message) = shows_model.save() {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				if let Err(message) = watched_model.drop(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				if let Err(message) = git_add_commit(&data.floral_barrel, format!("drop {show}")) {
 					eprintln!("{}", message);
 					return ExitCode::FAILURE;
 				}

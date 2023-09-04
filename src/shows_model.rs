@@ -46,6 +46,13 @@ impl ShowsRepo {
 		}
 	}
 
+	pub fn remove(&mut self, show_name: &str) -> Result<(), String> {
+		match self.shows.remove(show_name) {
+			Some(_) => Ok(()),
+			None => Err(format!("couldn't find show {show_name}"))
+		}
+	}
+
 	pub fn change_episode(&mut self, show_name: &str, new_episode: u32) -> Result<(), String> {
 		self.get_mut_show(show_name)?.episode = new_episode;
 		Ok(())

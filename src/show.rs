@@ -22,9 +22,15 @@ pub enum ShowCommands {
 		show: String,
 	},
 	/// Finish a show, putting it in your watched list with the date of finishing.
-	Finish {},
+	Finish {
+		#[arg(short, long)]
+		show: String,
+	},
 	/// Drop a show, putting it in your watched list tagged as dropped, with the date of dropping.
-	Drop {},
+	Drop {
+		#[arg(short, long)]
+		show: String,
+	},
 	/// Start a new show by specifying a link to it.
 	/// For `show watch` and `show download` to work properly, strip the end of the link so when you append a number to it, it results in the correct link to the episode.
 	New {},
