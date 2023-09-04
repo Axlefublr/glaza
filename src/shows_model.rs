@@ -9,6 +9,8 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::sh::open_in_browser;
+
 type Shows = HashMap<String, Show>;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -121,22 +123,34 @@ impl ShowsRepo {
 		Ok(())
 	}
 
-	pub fn print_next_episode_link(&self, show_name: &str) -> Result<(), String> {
+	pub fn get_next_episode_link(&self, show_name: &str) -> Result<String, String> {
 		let show = self.get_show(show_name)?;
-		println!("{}{}", show.link, show.episode + 1);
+		Ok(format!("{}{}", show.link, show.episode + 1))
+	}
+
+	pub fn open_next_episode_link(&self, show_name: &str) -> Result<(), String> {
+		open_in_browser(&self.get_next_episode_link(show_name)?)?;
 		Ok(())
 	}
 
-	pub fn print_next_download_link(&self, show_name: &str) -> Result<(), String> {
+	pub fn get_next_download_link(&self, show_name: &str) -> Result<String, String> {
 		let show = self.get_show(show_name)?;
-		println!("{}{}", show.link, show.downloaded + 1);
+		Ok(format!("{}{}", show.link, show.downloaded + 1))
+	}
+
+	pub fn open_next_download_link(&self, show_name: &str) -> Result<(), String> {
+		open_in_browser(&self.get_next_download_link(show_name)?)?;
 		Ok(())
 	}
 
-	pub fn print_link(&self, show_name: &str) -> Result<(), String> {
-		let show = self.get_show(show_name)?;
-		println!("{}", show.link);
+	pub fn open_link(&self, show_name: &str) -> Result<(), String> {
+		open_in_browser(&self.get_link(show_name)?)?;
 		Ok(())
+	}
+
+	pub fn get_link(&self, show_name: &str) -> Result<String, String> {
+		let show = self.get_show(show_name)?;
+		Ok(show.link.to_string())
 	}
 
 	pub fn save(self) -> Result<(), &'static str> {

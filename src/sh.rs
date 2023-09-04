@@ -1,3 +1,4 @@
+use std::env;
 use std::path::Path;
 use std::process::Command;
 
@@ -22,4 +23,20 @@ pub fn git_add_commit(working_dir: &Path, message: String) -> Result<(), &'stati
 		return Err("couldn't git commit");
 	}
 	Ok(())
+}
+
+pub fn open_in_browser(link: &str) -> Result<(), &'static str> {
+	let browser = get_browser()?;
+	Command::new(browser)
+		.arg(link)
+		.output()
+		.unwrap();
+	Ok(())
+}
+
+fn get_browser() -> Result<String, &'static str> {
+	match env::var("BROWSER") {
+		Ok(browser) => Ok(browser),
+		Err(_) => Err("your $BROWSER environment variable is undefined")
+	}
 }

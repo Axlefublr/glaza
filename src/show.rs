@@ -8,12 +8,18 @@ pub enum ShowCommands {
 	Watch {
 		#[arg(short, long)]
 		show: String,
+		/// Open the link in your $BROWSER instead of printing it to stdout
+		#[arg(short, long, default_value_t = false)]
+		open: bool
 	},
 	/// Print the link of a show you're currently watching to stdout, for downloading.
 	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set download` + 1, effectively resulting in "print the download link for the next episode"
 	Download {
 		#[arg(short, long)]
 		show: String,
+		/// Open the link in your $BROWSER instead of printing it to stdout
+		#[arg(short, long, default_value_t = false)]
+		open: bool
 	},
 	/// Print the link of a show to stdout.
 	/// Compared to `show watch` and `show download`, no useful magic is done.
@@ -21,6 +27,9 @@ pub enum ShowCommands {
 	Link {
 		#[arg(short, long)]
 		show: String,
+		/// Open the link in your $BROWSER instead of printing it to stdout
+		#[arg(short, long, default_value_t = false)]
+		open: bool
 	},
 	/// Finish a show, putting it in your watched list with the date of finishing.
 	Finish {

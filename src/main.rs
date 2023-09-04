@@ -85,24 +85,54 @@ fn main() -> ExitCode {
 					}
 				}
 			},
-			ShowCommands::Watch { show } => {
-				if let Err(message) = shows_model.print_next_episode_link(&show) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				};
-				ExitCode::SUCCESS
-			}
-			ShowCommands::Download { show } => {
-				if let Err(message) = shows_model.print_next_download_link(&show) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
+			ShowCommands::Watch { show, open } => {
+				if open {
+					if let Err(message) = shows_model.open_next_episode_link(&show) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					};
+				} else {
+					match shows_model.get_next_episode_link(&show) {
+						Ok(link) => println!("{}", link),
+						Err(message) => {
+							eprintln!("{}", message);
+							return ExitCode::FAILURE;
+						}
+					};
 				}
 				ExitCode::SUCCESS
 			}
-			ShowCommands::Link { show } => {
-				if let Err(message) = shows_model.print_link(&show) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
+			ShowCommands::Download { show, open } => {
+				if open {
+					if let Err(message) = shows_model.open_next_download_link(&show) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					}
+				} else {
+					match shows_model.get_next_download_link(&show) {
+						Ok(link) => println!("{}", link),
+						Err(message) => {
+							eprintln!("{}", message);
+							return ExitCode::FAILURE;
+						}
+					}
+				}
+				ExitCode::SUCCESS
+			}
+			ShowCommands::Link { show, open } => {
+				if open {
+					if let Err(message) = shows_model.open_link(&show) {
+						eprintln!("{}", message);
+						return ExitCode::FAILURE;
+					}
+				} else {
+					match shows_model.get_link(&show) {
+						Ok(link) => println!("{}", link),
+						Err(message) => {
+							eprintln!("{}", message);
+							return ExitCode::FAILURE;
+						}
+					}
 				}
 				ExitCode::SUCCESS
 			}
