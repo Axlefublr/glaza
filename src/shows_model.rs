@@ -39,6 +39,13 @@ impl ShowsRepo {
 		}
 	}
 
+	fn get_show(&self, show_name: &str) -> Result<&Show, String> {
+		match self.shows.get(show_name) {
+			Some(show) => Ok(show),
+			None => Err(format!("couldn't find show {show_name} in shows model")),
+		}
+	}
+
 	pub fn change_episode(&mut self, show_name: &str, new_episode: u32) -> Result<(), String> {
 		self.get_mut_show(show_name)?.episode = new_episode;
 		Ok(())
@@ -55,6 +62,18 @@ impl ShowsRepo {
 
 	pub fn change_link(&mut self, show_name: &str, new_link: String) -> Result<(), String> {
 		self.get_mut_show(show_name)?.link = new_link;
+		Ok(())
+	}
+
+	pub fn print_next_episode_link(&self, show_name: &str) -> Result<(), String> {
+		let show = self.get_show(show_name)?;
+		println!("{}{}", show.link, show.episode + 1);
+		Ok(())
+	}
+
+	pub fn print_next_download_link(&self, show_name: &str) -> Result<(), String> {
+		let show = self.get_show(show_name)?;
+		println!("{}{}", show.link, show.downloaded + 1);
 		Ok(())
 	}
 

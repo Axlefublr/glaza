@@ -79,8 +79,20 @@ fn main() -> ExitCode {
 					}
 				}
 			},
-			// ShowCommands::Watch { show } => unimplemented!(),
-			// ShowCommands::Download { show } => unimplemented!(),
+			ShowCommands::Watch { show } => {
+				if let Err(message) = shows_model.print_next_episode_link(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				};
+				ExitCode::SUCCESS
+			}
+			ShowCommands::Download { show } => {
+				if let Err(message) = shows_model.print_next_download_link(&show) {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
 			_ => unimplemented!(),
 		},
 		// UserCommands::Wl { action } => unimplemented!(),

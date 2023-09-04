@@ -2,18 +2,22 @@ use clap::Subcommand;
 
 #[derive(Subcommand)]
 pub enum ShowCommands {
-	/// Open a show you're currently watching in your $BROWSER.
-	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set episode` + 1, effectively resulting in "watch the next episode".
+	/// Print the link of a show you're currently watching to stdout.
+	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set episode` + 1, effectively resulting in "print the next episode's link".
 	Watch {
 		#[arg(short, long)]
 		show: String,
 	},
-	/// Open a show you're currently watching in your $BROWSER, for downloading.
-	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set download` + 1, effectively resulting in "download the next episode"
+	/// Print the link of a show you're currently watching to stdout, for downloading.
+	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set download` + 1, effectively resulting in "print the download link for the next episode"
 	Download {
 		#[arg(short, long)]
 		show: String,
 	},
+	/// Print the link of a show to stdout.
+	/// Compared to `show watch` and `show download`, no useful magic is done.
+	/// This is useful for streaming services that don't conveniently have the episode number as the last thing in the link.
+	Link {},
 	/// Finish a show, putting it in your watched list with the date of finishing.
 	Finish {},
 	/// Drop a show, putting it in your watched list tagged as dropped, with the date of dropping.
