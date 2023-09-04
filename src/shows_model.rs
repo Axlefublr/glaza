@@ -18,6 +18,12 @@ pub struct Show {
 	pub link: String,
 }
 
+impl Show {
+	pub fn new(link: String) -> Self {
+		Self { episode: 0, downloaded: 0, link }
+	}
+}
+
 pub struct ShowsRepo {
 	pub shows: Shows,
 	pub file_path: PathBuf,
@@ -44,6 +50,10 @@ impl ShowsRepo {
 			Some(show) => Ok(show),
 			None => Err(format!("couldn't find show {show_name} in shows model")),
 		}
+	}
+
+	pub fn new_show(&mut self, show_name: String, link: String) {
+		self.shows.insert(show_name, Show::new(link));
 	}
 
 	pub fn remove(&mut self, show_name: &str) -> Result<(), String> {

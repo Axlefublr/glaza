@@ -31,9 +31,14 @@ pub enum ShowCommands {
 		#[arg(short, long)]
 		show: String,
 	},
-	/// Start a new show by specifying a link to it.
+	/// Start a new show, optionally specifying a link to it.
 	/// For `show watch` and `show download` to work properly, strip the end of the link so when you append a number to it, it results in the correct link to the episode.
-	New {},
+	New {
+		#[arg(short, long)]
+		show: String,
+		#[arg(short, long, default_value_t = String::from(""))]
+		link: String
+	},
 	/// List all the shows you're currently watching in the format of `showName - ep99 - dn99`
 	List {},
 	/// Print the entirety of the watched file, effectively showing all shows you've ever watched.

@@ -140,6 +140,14 @@ fn main() -> ExitCode {
 				}
 				ExitCode::SUCCESS
 			}
+			ShowCommands::New { show, link } => {
+				shows_model.new_show(show, link);
+				if let Err(message) = shows_model.save() {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
 			_ => unimplemented!(),
 		},
 		// UserCommands::Wl { action } => unimplemented!(),
