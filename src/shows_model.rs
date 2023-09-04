@@ -20,7 +20,11 @@ pub struct Show {
 
 impl Show {
 	pub fn new(link: String) -> Self {
-		Self { episode: 0, downloaded: 0, link }
+		Self {
+			episode: 0,
+			downloaded: 0,
+			link,
+		}
 	}
 }
 
@@ -56,10 +60,33 @@ impl ShowsRepo {
 		self.shows.insert(show_name, Show::new(link));
 	}
 
+	pub fn list(&self) -> Result<(), &'static str> {
+		let longest_title = match self.shows.keys().map(|show_name| show_name.len()).max() {
+			Some(length) => length,
+			None => return Err("you have no shows you're currently watching"),
+		};
+		// this unwrap is safe because we just confirmed the iterator wouldn't be empty
+		let biggest_episode = self
+			.shows
+			.values()
+			.map(|show| show.episode.to_string().len())
+			.max()
+			.unwrap();
+		for (show_name, show_obj) in self.shows.iter() {
+			let title_diff = " ".repeat(longest_title - show_name.len());
+			let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
+			println!(
+				"{show_name}{title_diff} - ep{}{episode_diff} - dn{}",
+				show_obj.episode, show_obj.downloaded
+			);
+		}
+		Ok(())
+	}
+
 	pub fn remove(&mut self, show_name: &str) -> Result<(), String> {
 		match self.shows.remove(show_name) {
 			Some(_) => Ok(()),
-			None => Err(format!("couldn't find show {show_name}"))
+			None => Err(format!("couldn't find show {show_name}")),
 		}
 	}
 

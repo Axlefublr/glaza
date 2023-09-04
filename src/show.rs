@@ -37,10 +37,10 @@ pub enum ShowCommands {
 		#[arg(short, long)]
 		show: String,
 		#[arg(short, long, default_value_t = String::from(""))]
-		link: String
+		link: String,
 	},
 	/// List all the shows you're currently watching in the format of `showName - ep99 - dn99`
-	List {},
+	List,
 	/// Print the entirety of the watched file, effectively showing all shows you've ever watched.
 	Past {},
 	/// Update how many episodes of a show you're currently watching you've watched / downloaded.

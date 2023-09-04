@@ -148,6 +148,13 @@ fn main() -> ExitCode {
 				}
 				ExitCode::SUCCESS
 			}
+			ShowCommands::List => {
+				if let Err(message) = shows_model.list() {
+					eprintln!("{}", message);
+					return ExitCode::FAILURE;
+				}
+				ExitCode::SUCCESS
+			}
 			_ => unimplemented!(),
 		},
 		// UserCommands::Wl { action } => unimplemented!(),
