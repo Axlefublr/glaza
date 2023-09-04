@@ -2,7 +2,7 @@ use crate::args::Args;
 use args::UserCommands;
 use clap::Parser;
 use data::DataFiles;
-use git::git_add_commit;
+use sh::git_add_commit;
 use show::SetActions;
 use show::ShowCommands;
 use shows_model::ShowsRepo;
@@ -11,7 +11,7 @@ use watched_model::WatchedRepo;
 
 mod args;
 mod data;
-mod git;
+mod sh;
 mod show;
 mod shows_model;
 mod watched_model;
