@@ -3,68 +3,62 @@ use clap::Subcommand;
 #[derive(Subcommand)]
 // #[command(next_line_help = true)]
 pub enum ShowCommands {
-	/// Print the link of a show you're currently watching to stdout.
-	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set episode` + 1, effectively resulting in "print the next episode's link".
+	/// Print the next episode link
 	Watch {
 		#[arg(short, long)]
 		show: String,
-		/// Open the link in your $BROWSER instead of printing it to stdout
+		/// Open the link in your $BROWSER instead of printing it
 		#[arg(short, long)]
 		open: bool
 	},
-	/// Print the link of a show you're currently watching to stdout, for downloading.
-	/// Works by concatenating the link you specified for the show and the episode you last set with `floral_barrel show set download` + 1, effectively resulting in "print the download link for the next episode"
+	/// Print the next download link
 	#[command(visible_alias = "dn")]
 	Download {
 		#[arg(short, long)]
 		show: String,
-		/// Open the link in your $BROWSER instead of printing it to stdout
+		/// Open the link in your $BROWSER instead of printing it
 		#[arg(short, long)]
 		open: bool
 	},
-	/// Print the link of a show to stdout.
-	/// Compared to `show watch` and `show download`, no useful magic is done.
-	/// This is useful for streaming services that don't conveniently have the episode number as the last thing in the link.
+	/// Print the link property of a show
 	Link {
 		#[arg(short, long)]
 		show: String,
-		/// Open the link in your $BROWSER instead of printing it to stdout
+		/// Open the link in your $BROWSER instead of printing it
 		#[arg(short, long)]
 		open: bool
 	},
-	/// Finish a show, putting it in your watched list with the date of finishing.
+	/// Finish a show, putting it in your watched list
 	Finish {
 		#[arg(short, long)]
 		show: String,
 	},
-	/// Drop a show, putting it in your watched list tagged as dropped, with the date of dropping.
+	/// Drop a show, putting it in your watched list
 	Drop {
 		#[arg(short, long)]
 		show: String,
 	},
-	/// Start a new show, optionally specifying a link to it.
-	/// For `show watch` and `show download` to work properly, strip the end of the link so when you append a number to it, it results in the correct link to the episode.
+	/// Start a new show
 	New {
 		#[arg(short, long)]
 		show: String,
 		#[arg(short, long, default_value_t = String::from(""))]
 		link: String,
 	},
-	/// List all the shows you're currently watching in the format of `showName - ep99 - dn99`
+	/// List all the shows you're currently watching
 	List {
 		#[arg(short, long)]
 		links: bool,
 	},
-	/// Print the entirety of the watched file, effectively showing all shows you've ever watched.
+	/// Print the entirety of the watched list
 	Past,
-	/// Removes a show from the list without making a commit or moving it to your watchlist.
-	/// Helpful for when you accidentally added a show you didn't intend to.
+	/// Removes a show from the list without putting it in your watched list
 	#[command(visible_alias = "rm")]
 	Remove {
 		#[arg(short, long)]
 		show: String,
 	},
-	/// Update how many episodes of a show you're currently watching you've watched / downloaded.
+	/// Update a show's properties
 	Set {
 		#[command(subcommand)]
 		action: SetActions,
@@ -73,8 +67,7 @@ pub enum ShowCommands {
 
 #[derive(Subcommand)]
 pub enum SetActions {
-	// todo: alias to ep
-	/// Set the episode you just watched of a show
+	/// Set the episode you just watched
 	#[command(visible_alias = "ep")]
 	Episode {
 		#[arg(short, long)]
@@ -82,8 +75,7 @@ pub enum SetActions {
 		#[arg(short, long)]
 		episode: u32,
 	},
-	// todo: alias to dn
-	/// Set the episode you just downloaded of a show
+	/// Set the episode you just downloaded
 	#[command(visible_alias = "dn")]
 	Download {
 		#[arg(short, long)]
@@ -91,6 +83,7 @@ pub enum SetActions {
 		#[arg(short, long)]
 		episode: u32,
 	},
+	/// Set the link
 	Link {
 		#[arg(short, long)]
 		show: String,
