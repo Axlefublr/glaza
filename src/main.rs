@@ -63,7 +63,6 @@ fn main() -> ExitCode {
 						eprintln!("{}", message);
 						return ExitCode::FAILURE;
 					}
-					// todo: commits are done after a singular save at the end by setting a variable to a variant of an enum or smth
 					if let Err(message) =
 						git_add_commit(&data.floral_barrel, format!("watch ep{episode} -> {show}"))
 					{
@@ -148,8 +147,8 @@ fn main() -> ExitCode {
 				}
 				ExitCode::SUCCESS
 			}
-			ShowCommands::List => {
-				if let Err(message) = shows_model.list() {
+			ShowCommands::List { links } => {
+				if let Err(message) = shows_model.list(links) {
 					eprintln!("{}", message);
 					return ExitCode::FAILURE;
 				}

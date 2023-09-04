@@ -41,7 +41,10 @@ pub enum ShowCommands {
 		link: String,
 	},
 	/// List all the shows you're currently watching in the format of `showName - ep99 - dn99`
-	List,
+	List {
+		#[arg(short, long, default_value_t = false)]
+		links: bool,
+	},
 	/// Print the entirety of the watched file, effectively showing all shows you've ever watched.
 	Past,
 	/// Removes a show from the list without making a commit or moving it to your watchlist.

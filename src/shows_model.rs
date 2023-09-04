@@ -60,7 +60,7 @@ impl ShowsRepo {
 		self.shows.insert(show_name, Show::new(link));
 	}
 
-	pub fn list(&self) -> Result<(), &'static str> {
+	pub fn list(&self, should_links: bool) -> Result<(), &'static str> {
 		let longest_title = match self.shows.keys().map(|show_name| show_name.len()).max() {
 			Some(length) => length,
 			None => return Err("you have no shows you're currently watching"),
@@ -72,12 +72,24 @@ impl ShowsRepo {
 			.map(|show| show.episode.to_string().len())
 			.max()
 			.unwrap();
+		let biggest_download = self
+			.shows
+			.values()
+			.map(|show| show.downloaded.to_string().len())
+			.max()
+			.unwrap();
+		let mut link = String::from("");
 		for (show_name, show_obj) in self.shows.iter() {
 			let title_diff = " ".repeat(longest_title - show_name.len());
 			let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
+			let download_diff =
+				" ".repeat(biggest_download - show_obj.downloaded.to_string().len());
+			if should_links {
+				link = format!(" - {}", show_obj.link);
+			};
 			println!(
-				"{show_name}{title_diff} - ep{}{episode_diff} - dn{}",
-				show_obj.episode, show_obj.downloaded
+				"{show_name}{title_diff} - ep{}{episode_diff} - dn{}{download_diff}{}",
+				show_obj.episode, show_obj.downloaded, link
 			);
 		}
 		Ok(())
