@@ -12,7 +12,7 @@ pub struct Args {
 	#[command(subcommand)]
 	pub action: UserCommands,
 	#[arg(short, long)]
-	pub git: bool
+	pub git: bool,
 }
 
 #[derive(Subcommand)]

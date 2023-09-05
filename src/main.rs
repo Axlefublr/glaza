@@ -2,7 +2,6 @@ use crate::args::Args;
 use args::UserCommands;
 use clap::Parser;
 use data::DataFiles;
-use sh::git_add_commit;
 use show::SetActions;
 use show::ShowCommands;
 use shows_model::ShowsRepo;
@@ -24,152 +23,58 @@ fn main() -> ExitCode {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
-	let mut shows_model = match ShowsRepo::new(&data.shows) {
+	let shows_model = match ShowsRepo::new(&data.shows) {
 		Ok(shows_model) => shows_model,
 		Err(message) => {
 			eprintln!("{}", message);
 			return ExitCode::FAILURE;
 		}
 	};
-	let mut watched_model = match WatchedRepo::new(&data.watched) {
+	let watched_model = match WatchedRepo::new(&data.watched) {
 		Ok(watched_model) => watched_model,
 		Err(message) => {
 			eprintln!("{}", message);
 			return ExitCode::FAILURE;
 		}
 	};
-	return match args.action {
+	match args.action {
 		UserCommands::Show { action } => match action {
 			ShowCommands::Set { action } => match action {
 				SetActions::Download { show, episode } => {
-					show::actions::set::download(show, episode, shows_model, &data.floral_barrel)
+					show::actions::set::download(show, episode, shows_model, &data.floral_barrel, args.git)
 				}
 				SetActions::Episode { show, episode } => {
-					show::actions::set::episode(show, episode, shows_model, &data.floral_barrel)
+					show::actions::set::episode(show, episode, shows_model, &data.floral_barrel, args.git)
 				}
 				SetActions::Link { show, link } => {
-					show::actions::set::link(show, link, shows_model, &data.floral_barrel)
+					show::actions::set::link(show, link, shows_model, &data.floral_barrel, args.git)
 				}
 			},
-			ShowCommands::Watch { show, open } => {
-				if open {
-					if let Err(message) = shows_model.open_next_episode_link(&show) {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					};
-				} else {
-					match shows_model.get_next_episode_link(&show) {
-						Ok(link) => println!("{}", link),
-						Err(message) => {
-							eprintln!("{}", message);
-							return ExitCode::FAILURE;
-						}
-					};
-				}
-				ExitCode::SUCCESS
-			}
+			ShowCommands::Watch { show, open } => show::actions::watch(show, open, shows_model),
 			ShowCommands::Download { show, open } => {
-				if open {
-					if let Err(message) = shows_model.open_next_download_link(&show) {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					}
-				} else {
-					match shows_model.get_next_download_link(&show) {
-						Ok(link) => println!("{}", link),
-						Err(message) => {
-							eprintln!("{}", message);
-							return ExitCode::FAILURE;
-						}
-					}
-				}
-				ExitCode::SUCCESS
+				show::actions::download(show, open, shows_model)
 			}
-			ShowCommands::Link { show, open } => {
-				if open {
-					if let Err(message) = shows_model.open_link(&show) {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					}
-				} else {
-					match shows_model.get_link(&show) {
-						Ok(link) => println!("{}", link),
-						Err(message) => {
-							eprintln!("{}", message);
-							return ExitCode::FAILURE;
-						}
-					}
-				}
-				ExitCode::SUCCESS
-			}
+			ShowCommands::Link { show, open } => show::actions::link(show, open, shows_model),
 			ShowCommands::Finish { show } => {
-				let _ = shows_model.remove(&show);
-				if let Err(message) = shows_model.save() {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				if let Err(message) = watched_model.finish(&show) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				if let Err(message) = git_add_commit(&data.floral_barrel, format!("finish {show}"))
-				{
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				ExitCode::SUCCESS
+				show::actions::finish(show, shows_model, watched_model, &data.floral_barrel, args.git)
 			}
 			ShowCommands::Drop { show } => {
-				let _ = shows_model.remove(&show);
-				if let Err(message) = shows_model.save() {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				if let Err(message) = watched_model.drop(&show) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				if let Err(message) = git_add_commit(&data.floral_barrel, format!("drop {show}")) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				ExitCode::SUCCESS
+				show::actions::drop(show, shows_model, watched_model, &data.floral_barrel, args.git)
 			}
 			ShowCommands::New { show, link } => {
-				shows_model.new_show(show, link);
-				if let Err(message) = shows_model.save() {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				ExitCode::SUCCESS
+				show::actions::new(show, link, shows_model, &data.floral_barrel, args.git)
 			}
 			ShowCommands::List { links } => {
-				if let Err(message) = shows_model.list(links) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				ExitCode::SUCCESS
+				show::actions::list(links, shows_model)
 			}
 			ShowCommands::Past => {
-				if let Err(message) = watched_model.read() {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				ExitCode::SUCCESS
+				show::actions::past(watched_model)
 			}
 			ShowCommands::Remove { show } => {
-				if let Err(message) = shows_model.remove(&show) {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				};
-				if let Err(message) = shows_model.save() {
-					eprintln!("{}", message);
-					return ExitCode::FAILURE;
-				}
-				ExitCode::SUCCESS
+				show::actions::remove(show, shows_model, &data.floral_barrel, args.git)
 			}
 		},
 		// UserCommands::Wl { action } => unimplemented!(),
 		_ => unimplemented!(),
-	};
+	}
 }

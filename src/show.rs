@@ -11,7 +11,7 @@ pub enum ShowCommands {
 		show: String,
 		/// Open the link in your $BROWSER instead of printing it
 		#[arg(short, long)]
-		open: bool
+		open: bool,
 	},
 	/// Print the next download link
 	#[command(visible_alias = "dn")]
@@ -20,7 +20,7 @@ pub enum ShowCommands {
 		show: String,
 		/// Open the link in your $BROWSER instead of printing it
 		#[arg(short, long)]
-		open: bool
+		open: bool,
 	},
 	/// Print the link property of a show
 	Link {
@@ -28,7 +28,7 @@ pub enum ShowCommands {
 		show: String,
 		/// Open the link in your $BROWSER instead of printing it
 		#[arg(short, long)]
-		open: bool
+		open: bool,
 	},
 	/// Finish a show, putting it in your watched list
 	Finish {

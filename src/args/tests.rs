@@ -1,5 +1,5 @@
-use clap::CommandFactory;
 use super::Args;
+use clap::CommandFactory;
 
 #[test]
 fn verify_cli() {
