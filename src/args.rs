@@ -11,6 +11,7 @@ mod tests;
 pub struct Args {
 	#[command(subcommand)]
 	pub action: UserCommands,
+	/// If the action writes to a file, commit that change
 	#[arg(short, long)]
 	pub git: bool,
 }

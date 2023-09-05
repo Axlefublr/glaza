@@ -5,7 +5,7 @@ pub mod actions;
 #[derive(Subcommand)]
 // #[command(next_line_help = true)]
 pub enum ShowCommands {
-	/// Print the next episode link
+	/// Print or open the next episode's link
 	Watch {
 		#[arg(short, long)]
 		show: String,
@@ -13,7 +13,7 @@ pub enum ShowCommands {
 		#[arg(short, long)]
 		open: bool,
 	},
-	/// Print the next download link
+	/// Print or open the next download link
 	#[command(visible_alias = "dn")]
 	Download {
 		#[arg(short, long)]
@@ -22,7 +22,7 @@ pub enum ShowCommands {
 		#[arg(short, long)]
 		open: bool,
 	},
-	/// Print the link property of a show
+	/// Print or open the link of a show
 	Link {
 		#[arg(short, long)]
 		show: String,
@@ -54,7 +54,7 @@ pub enum ShowCommands {
 	},
 	/// Print the entirety of the watched list
 	Past,
-	/// Removes a show from the list without putting it in your watched list
+	/// Remove a show from the list without putting it in your watched list
 	#[command(visible_alias = "rm")]
 	Remove {
 		#[arg(short, long)]
