@@ -4,7 +4,7 @@ use clap::Parser;
 use data::DataFiles;
 use show::SetActions;
 use show::ShowCommands;
-use shows_model::ShowsRepo;
+use show::model::ShowsRepo;
 use std::process::ExitCode;
 use watched_model::WatchedRepo;
 
@@ -12,7 +12,6 @@ mod args;
 mod data;
 mod sh;
 mod show;
-mod shows_model;
 mod watched_model;
 mod wl;
 

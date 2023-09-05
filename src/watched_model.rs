@@ -24,10 +24,10 @@ impl WatchedRepo {
 		Ok(())
 	}
 
-	fn append_show(&mut self, text: &str) -> Result<(), &'static str> {
+	fn append_show(&mut self, show: &str) -> Result<(), &'static str> {
 		let today = Utc::now().format("%y.%m.%d");
-		if writeln!(self.file, "{} - {}", today, text).is_err() {
-			return Err("couldn't write to watched file");
+		if writeln!(self.file, "{} - {}", today, show).is_err() {
+			return Err("couldn't append to watched file");
 		}
 		Ok(())
 	}
@@ -41,9 +41,9 @@ impl WatchedRepo {
 	}
 }
 
-fn parse(file_path: &Path) -> Result<File, &'static str> {
+pub fn parse(file_path: &Path) -> Result<File, &'static str> {
 	match OpenOptions::new().append(true).read(true).open(file_path) {
 		Ok(file) => Ok(file),
-		Err(_) => Err("couldn't open the watched file for appending"),
+		Err(_) => Err("couldn't open the watched file for writing"),
 	}
 }

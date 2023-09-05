@@ -1,5 +1,6 @@
 use clap::Subcommand;
 
+pub mod model;
 pub mod actions;
 
 #[derive(Subcommand)]
