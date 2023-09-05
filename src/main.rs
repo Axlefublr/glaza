@@ -42,48 +42,13 @@ fn main() -> ExitCode {
 		UserCommands::Show { action } => match action {
 			ShowCommands::Set { action } => match action {
 				SetActions::Download { show, episode } => {
-					// todo: impl of Result<smth, &'static str> to unwrap the error and write to stderr, and return the exitcode
-					if let Err(message) = shows_model.change_downloaded(&show, episode) {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					};
-					match shows_model.save() {
-						Err(message) => {
-							eprintln!("{}", message);
-							ExitCode::FAILURE
-						}
-						Ok(()) => ExitCode::SUCCESS,
-					}
+					show::actions::set::download(show, episode, shows_model, &data.floral_barrel)
 				}
 				SetActions::Episode { show, episode } => {
-					if let Err(message) = shows_model.change_episode(&show, episode) {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					};
-					if let Err(message) = shows_model.save() {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					}
-					if let Err(message) =
-						git_add_commit(&data.floral_barrel, format!("watch ep{episode} -> {show}"))
-					{
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					}
-					ExitCode::SUCCESS
+					show::actions::set::episode(show, episode, shows_model, &data.floral_barrel)
 				}
 				SetActions::Link { show, link } => {
-					if let Err(message) = shows_model.change_link(&show, link) {
-						eprintln!("{}", message);
-						return ExitCode::FAILURE;
-					};
-					match shows_model.save() {
-						Err(message) => {
-							eprintln!("{}", message);
-							ExitCode::FAILURE
-						}
-						Ok(()) => ExitCode::SUCCESS,
-					}
+					show::actions::set::link(show, link, shows_model, &data.floral_barrel)
 				}
 			},
 			ShowCommands::Watch { show, open } => {

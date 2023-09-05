@@ -1,5 +1,7 @@
 use clap::Subcommand;
 
+pub mod actions;
+
 #[derive(Subcommand)]
 // #[command(next_line_help = true)]
 pub enum ShowCommands {
