@@ -20,7 +20,7 @@ mod wl;
 fn main() -> ExitCode {
 	let args = Args::parse();
 	let data = DataFiles::new();
-	if let Err(message) = data.create() {
+	if let Err(message) = data.create(args.git) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}

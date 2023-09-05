@@ -2,6 +2,9 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+use crate::sh;
+use crate::sh::is_git_init;
+
 const EMPTY_JSON_OBJECT: &str = r"{}";
 const DATA_DIR: &str = "floral_barrel";
 const SHOWS_FILE: &str = "shows.json";
@@ -50,9 +53,11 @@ impl DataFiles {
 		}
 	}
 
-	pub fn create(&self) -> Result<(), String> {
-		if fs::create_dir_all(&self.floral_barrel).is_err() {
-			return Err(format!("couldn't create {}", &self.floral_barrel.display()));
+	pub fn create(&self, git_init: bool) -> Result<(), String> {
+		fs::create_dir_all(&self.floral_barrel)
+			.map_err(|_| format!("couldn't create {}", &self.floral_barrel.display()))?;
+		if git_init && !is_git_init(&self.floral_barrel) {
+			sh::git_init(&self.floral_barrel)?;
 		}
 		ensure_exists(&self.shows, EMPTY_JSON_OBJECT)?;
 		ensure_exists(&self.watched, "")?;
