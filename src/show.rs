@@ -1,7 +1,7 @@
 use clap::Subcommand;
 
-pub mod model;
 pub mod actions;
+pub mod model;
 
 #[derive(Subcommand)]
 // #[command(next_line_help = true)]

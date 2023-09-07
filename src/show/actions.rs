@@ -1,5 +1,5 @@
 use crate::sh::git_add_commit;
-use crate::shows_model::ShowsRepo;
+use crate::show::model::ShowsRepo;
 use crate::watched_model::WatchedRepo;
 use std::path::Path;
 use std::process::ExitCode;
@@ -65,7 +65,7 @@ pub fn finish(
 	mut shows_model: ShowsRepo,
 	mut watched_model: WatchedRepo,
 	data_dir: &Path,
-	should_commit: bool
+	should_commit: bool,
 ) -> ExitCode {
 	let _ = shows_model.remove(&show);
 	if let Err(message) = shows_model.save() {
@@ -90,7 +90,7 @@ pub fn drop(
 	mut shows_model: ShowsRepo,
 	mut watched_model: WatchedRepo,
 	data_dir: &Path,
-	should_commit: bool
+	should_commit: bool,
 ) -> ExitCode {
 	let _ = shows_model.remove(&show);
 	if let Err(message) = shows_model.save() {
@@ -110,7 +110,13 @@ pub fn drop(
 	ExitCode::SUCCESS
 }
 
-pub fn new(show: String, link: String, mut shows_model: ShowsRepo, data_dir: &Path, should_commit: bool) -> ExitCode {
+pub fn new(
+	show: String,
+	link: String,
+	mut shows_model: ShowsRepo,
+	data_dir: &Path,
+	should_commit: bool,
+) -> ExitCode {
 	shows_model.new_show(show.clone(), link);
 	if let Err(message) = shows_model.save() {
 		eprintln!("{}", message);
@@ -141,7 +147,12 @@ pub fn past(mut watched_model: WatchedRepo) -> ExitCode {
 	ExitCode::SUCCESS
 }
 
-pub fn remove(show: String, mut shows_model: ShowsRepo, data_dir: &Path, should_commit: bool) -> ExitCode {
+pub fn remove(
+	show: String,
+	mut shows_model: ShowsRepo,
+	data_dir: &Path,
+	should_commit: bool,
+) -> ExitCode {
 	if let Err(message) = shows_model.remove(&show) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;

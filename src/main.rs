@@ -2,11 +2,13 @@ use crate::args::Args;
 use args::UserCommands;
 use clap::Parser;
 use data::DataFiles;
+use show::model::ShowsRepo;
 use show::SetActions;
 use show::ShowCommands;
-use show::model::ShowsRepo;
 use std::process::ExitCode;
 use watched_model::WatchedRepo;
+use wl::model::WlRepo;
+use wl::WlCommands;
 
 mod args;
 mod data;
@@ -36,15 +38,30 @@ fn main() -> ExitCode {
 			return ExitCode::FAILURE;
 		}
 	};
+	let wl_model = match WlRepo::new(&data.watch_later) {
+		Ok(wl_model) => wl_model,
+		Err(message) => {
+			eprintln!("{}", message);
+			return ExitCode::FAILURE;
+		}
+	};
 	match args.action {
 		UserCommands::Show { action } => match action {
 			ShowCommands::Set { action } => match action {
-				SetActions::Download { show, episode } => {
-					show::actions::set::download(show, episode, shows_model, &data.floral_barrel, args.git)
-				}
-				SetActions::Episode { show, episode } => {
-					show::actions::set::episode(show, episode, shows_model, &data.floral_barrel, args.git)
-				}
+				SetActions::Download { show, episode } => show::actions::set::download(
+					show,
+					episode,
+					shows_model,
+					&data.floral_barrel,
+					args.git,
+				),
+				SetActions::Episode { show, episode } => show::actions::set::episode(
+					show,
+					episode,
+					shows_model,
+					&data.floral_barrel,
+					args.git,
+				),
 				SetActions::Link { show, link } => {
 					show::actions::set::link(show, link, shows_model, &data.floral_barrel, args.git)
 				}
@@ -54,26 +71,36 @@ fn main() -> ExitCode {
 				show::actions::download(show, open, shows_model)
 			}
 			ShowCommands::Link { show, open } => show::actions::link(show, open, shows_model),
-			ShowCommands::Finish { show } => {
-				show::actions::finish(show, shows_model, watched_model, &data.floral_barrel, args.git)
-			}
-			ShowCommands::Drop { show } => {
-				show::actions::drop(show, shows_model, watched_model, &data.floral_barrel, args.git)
-			}
+			ShowCommands::Finish { show } => show::actions::finish(
+				show,
+				shows_model,
+				watched_model,
+				&data.floral_barrel,
+				args.git,
+			),
+			ShowCommands::Drop { show } => show::actions::drop(
+				show,
+				shows_model,
+				watched_model,
+				&data.floral_barrel,
+				args.git,
+			),
 			ShowCommands::New { show, link } => {
 				show::actions::new(show, link, shows_model, &data.floral_barrel, args.git)
 			}
-			ShowCommands::List { links } => {
-				show::actions::list(links, shows_model)
-			}
-			ShowCommands::Past => {
-				show::actions::past(watched_model)
-			}
+			ShowCommands::List { links } => show::actions::list(links, shows_model),
+			ShowCommands::Past => show::actions::past(watched_model),
 			ShowCommands::Remove { show } => {
 				show::actions::remove(show, shows_model, &data.floral_barrel, args.git)
 			}
 		},
-		// UserCommands::Wl { action } => unimplemented!(),
-		_ => unimplemented!(),
+		UserCommands::Wl { action } => match action {
+			WlCommands::Add { show } => {
+				wl::actions::add(show, wl_model, &data.floral_barrel, args.git)
+			}
+			WlCommands::List => unimplemented!(),
+			WlCommands::Remove { show } => unimplemented!(),
+			WlCommands::Start { show } => unimplemented!(),
+		},
 	}
 }

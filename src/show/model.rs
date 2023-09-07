@@ -1,3 +1,4 @@
+use crate::sh::open_in_browser;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::ser::PrettyFormatter;
@@ -8,8 +9,6 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
-
-use crate::sh::open_in_browser;
 
 type Shows = HashMap<String, Show>;
 
