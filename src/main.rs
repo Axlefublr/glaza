@@ -98,9 +98,9 @@ fn main() -> ExitCode {
 			WlCommands::Add { show } => {
 				wl::actions::add(show, wl_model, &data.floral_barrel, args.git)
 			}
-			WlCommands::List => unimplemented!(),
-			WlCommands::Remove { show } => unimplemented!(),
-			WlCommands::Start { show } => unimplemented!(),
+			WlCommands::List => wl::actions::list(wl_model),
+			WlCommands::Remove { show } => wl::actions::remove(show, wl_model, &data.floral_barrel, args.git),
+			WlCommands::Start { show, link } => wl::actions::start(show, link, wl_model, shows_model, &data.floral_barrel, args.git),
 		},
 	}
 }

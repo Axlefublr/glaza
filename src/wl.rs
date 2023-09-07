@@ -19,6 +19,8 @@ pub enum WlCommands {
 	Start {
 		#[arg(short, long)]
 		show: String,
+		#[arg(short, long)]
+		link: String,
 	},
 	/// Print the entire contents of your watch later file
 	List,

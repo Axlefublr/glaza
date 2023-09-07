@@ -23,6 +23,19 @@ impl WlRepo {
 		self.save()
 	}
 
+	pub fn remove(mut self, what: &str) -> Result<(), &'static str> {
+		self.contents = self.contents
+			.lines()
+			.filter(|line| *line != what)
+			.collect::<Vec<_>>()
+			.join("\n");
+		self.save()
+	}
+
+	pub fn list(&self) {
+		println!("{}", self.contents.trim_end())
+	}
+
 	fn save(self) -> Result<(), &'static str> {
 		fs::write(self.file_path, self.contents).map_err(|_| "couldn't write to watch later file")
 	}
