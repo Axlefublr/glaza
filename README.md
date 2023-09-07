@@ -4,7 +4,7 @@ Track the shows you watch using your terminal!
 
 `floral_barrel` will create a directory where it will store its files.
 
-That directory is `~/.local/share/floral_barrel` on linux and *✨somewhere✨* on windows.
+That directory is `~/.local/share/floral_barrel` on linux and `%AppData%\floral_barrel` on windows.
 
 Every time you specify the `-g`/`--git` flag, the action you do will be commited, if it writes to one of the files.
 
@@ -14,11 +14,10 @@ Example usage:
 ```
 floral_barrel -g show set ep -s "One Piece Live Action" -e 1
 floral_barrel show set ep -s "One Piece Live Action" -e 2
-floral_barrel -g show set ep -s "One Piece Live Action" -e 3
+floral_barrel --git show set ep -s "One Piece Live Action" -e 3
 floral_barrel -g show finish -s "One Piece Live Action"
 ```
 
-If you use the `--git` flag, that's how the commits would look like.
 You get to decide which actions are big enough for you to commit, and which ones are not.
 
 ```
