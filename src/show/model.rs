@@ -20,18 +20,18 @@ pub struct Show {
 }
 
 impl Show {
-	pub fn new(link: String) -> Self {
+	pub fn new(link: &str) -> Self {
 		Self {
 			episode: 0,
 			downloaded: 0,
-			link,
+			link: link.to_owned(),
 		}
 	}
 }
 
 pub struct ShowsRepo {
 	pub shows: Shows,
-	pub file_path: PathBuf,
+	file_path: PathBuf,
 }
 
 impl ShowsRepo {
@@ -57,8 +57,9 @@ impl ShowsRepo {
 		}
 	}
 
-	pub fn new_show(&mut self, show_name: String, link: String) {
-		self.shows.insert(show_name, Show::new(link));
+	pub fn new_show(mut self, show_name: &str, link: &str) -> Result<(), String> {
+		self.shows.insert(show_name.to_owned(), Show::new(link));
+		self.save()
 	}
 
 	pub fn list(&self, should_links: bool) -> Result<(), &'static str> {
@@ -96,30 +97,30 @@ impl ShowsRepo {
 		Ok(())
 	}
 
-	pub fn remove(&mut self, show_name: &str) -> Result<(), String> {
-		match self.shows.remove(show_name) {
-			Some(_) => Ok(()),
-			None => Err(format!("couldn't find show {show_name}")),
+	pub fn remove(mut self, show_name: &str) -> Result<(), String> {
+		if self.shows.remove(show_name).is_none() {
+			return Err(format!("couldn't find show {show_name}"));
 		}
+		self.save()
 	}
 
-	pub fn change_episode(&mut self, show_name: &str, new_episode: u32) -> Result<(), String> {
+	pub fn change_episode(mut self, show_name: &str, new_episode: u32) -> Result<(), String> {
 		self.get_mut_show(show_name)?.episode = new_episode;
-		Ok(())
+		self.save()
 	}
 
 	pub fn change_downloaded(
-		&mut self,
+		mut self,
 		show_name: &str,
 		new_downloaded: u32,
 	) -> Result<(), String> {
 		self.get_mut_show(show_name)?.downloaded = new_downloaded;
-		Ok(())
+		self.save()
 	}
 
-	pub fn change_link(&mut self, show_name: &str, new_link: String) -> Result<(), String> {
-		self.get_mut_show(show_name)?.link = new_link;
-		Ok(())
+	pub fn change_link(mut self, show_name: &str, new_link: &str) -> Result<(), String> {
+		self.get_mut_show(show_name)?.link = new_link.to_owned();
+		self.save()
 	}
 
 	pub fn get_next_episode_link(&self, show_name: &str) -> Result<String, String> {
@@ -152,15 +153,15 @@ impl ShowsRepo {
 		Ok(show.link.to_string())
 	}
 
-	pub fn save(self) -> Result<(), &'static str> {
+	pub fn save(self) -> Result<(), String> {
 		let formatter = PrettyFormatter::with_indent(b"	");
 		let mut data = Vec::new();
 		let mut serializer = Serializer::with_formatter(&mut data, formatter);
 		if self.shows.serialize(&mut serializer).is_err() {
-			return Err("couldn't serialize shows model into json");
+			return Err("couldn't serialize shows model into json".to_owned());
 		};
 		if fs::write(self.file_path, data).is_err() {
-			return Err("failed to write to shows.json");
+			return Err("failed to write to shows.json".to_owned());
 		}
 		Ok(())
 	}

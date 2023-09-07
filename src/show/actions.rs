@@ -6,14 +6,14 @@ use std::process::ExitCode;
 
 pub mod set;
 
-pub fn watch(show: String, open: bool, shows_model: ShowsRepo) -> ExitCode {
+pub fn watch(show: &str, open: bool, shows_model: ShowsRepo) -> ExitCode {
 	if open {
-		if let Err(message) = shows_model.open_next_episode_link(&show) {
+		if let Err(message) = shows_model.open_next_episode_link(show) {
 			eprintln!("{}", message);
 			return ExitCode::FAILURE;
 		};
 	} else {
-		match shows_model.get_next_episode_link(&show) {
+		match shows_model.get_next_episode_link(show) {
 			Ok(link) => println!("{}", link),
 			Err(message) => {
 				eprintln!("{}", message);
@@ -24,14 +24,14 @@ pub fn watch(show: String, open: bool, shows_model: ShowsRepo) -> ExitCode {
 	ExitCode::SUCCESS
 }
 
-pub fn download(show: String, open: bool, shows_model: ShowsRepo) -> ExitCode {
+pub fn download(show: &str, open: bool, shows_model: ShowsRepo) -> ExitCode {
 	if open {
-		if let Err(message) = shows_model.open_next_download_link(&show) {
+		if let Err(message) = shows_model.open_next_download_link(show) {
 			eprintln!("{}", message);
 			return ExitCode::FAILURE;
 		}
 	} else {
-		match shows_model.get_next_download_link(&show) {
+		match shows_model.get_next_download_link(show) {
 			Ok(link) => println!("{}", link),
 			Err(message) => {
 				eprintln!("{}", message);
@@ -42,14 +42,14 @@ pub fn download(show: String, open: bool, shows_model: ShowsRepo) -> ExitCode {
 	ExitCode::SUCCESS
 }
 
-pub fn link(show: String, open: bool, shows_model: ShowsRepo) -> ExitCode {
+pub fn link(show: &str, open: bool, shows_model: ShowsRepo) -> ExitCode {
 	if open {
-		if let Err(message) = shows_model.open_link(&show) {
+		if let Err(message) = shows_model.open_link(show) {
 			eprintln!("{}", message);
 			return ExitCode::FAILURE;
 		}
 	} else {
-		match shows_model.get_link(&show) {
+		match shows_model.get_link(show) {
 			Ok(link) => println!("{}", link),
 			Err(message) => {
 				eprintln!("{}", message);
@@ -61,18 +61,14 @@ pub fn link(show: String, open: bool, shows_model: ShowsRepo) -> ExitCode {
 }
 
 pub fn finish(
-	show: String,
-	mut shows_model: ShowsRepo,
+	show: &str,
+	shows_model: ShowsRepo,
 	mut watched_model: WatchedRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	let _ = shows_model.remove(&show);
-	if let Err(message) = shows_model.save() {
-		eprintln!("{}", message);
-		return ExitCode::FAILURE;
-	}
-	if let Err(message) = watched_model.finish(&show) {
+	let _ = shows_model.remove(show);
+	if let Err(message) = watched_model.finish(show) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
@@ -86,18 +82,14 @@ pub fn finish(
 }
 
 pub fn drop(
-	show: String,
-	mut shows_model: ShowsRepo,
+	show: &str,
+	shows_model: ShowsRepo,
 	mut watched_model: WatchedRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	let _ = shows_model.remove(&show);
-	if let Err(message) = shows_model.save() {
-		eprintln!("{}", message);
-		return ExitCode::FAILURE;
-	}
-	if let Err(message) = watched_model.drop(&show) {
+	let _ = shows_model.remove(show);
+	if let Err(message) = watched_model.drop(show) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
@@ -111,14 +103,13 @@ pub fn drop(
 }
 
 pub fn new(
-	show: String,
-	link: String,
-	mut shows_model: ShowsRepo,
+	show: &str,
+	link: &str,
+	shows_model: ShowsRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	shows_model.new_show(show.clone(), link);
-	if let Err(message) = shows_model.save() {
+	if let Err(message) = shows_model.new_show(show, link) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	}
@@ -148,19 +139,15 @@ pub fn past(mut watched_model: WatchedRepo) -> ExitCode {
 }
 
 pub fn remove(
-	show: String,
-	mut shows_model: ShowsRepo,
+	show: &str,
+	shows_model: ShowsRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	if let Err(message) = shows_model.remove(&show) {
+	if let Err(message) = shows_model.remove(show) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	};
-	if let Err(message) = shows_model.save() {
-		eprintln!("{}", message);
-		return ExitCode::FAILURE;
-	}
 	if should_commit {
 		if let Err(message) = git_add_commit(data_dir, format!("remove -> {show}")) {
 			eprintln!("{}", message);
