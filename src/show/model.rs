@@ -29,59 +29,59 @@ impl Show {
 	}
 }
 
-pub struct ShowsRepo {
-	pub shows: Shows,
+pub struct CurrentRepo {
+	pub current: Shows,
 	file_path: PathBuf,
 }
 
-impl ShowsRepo {
+impl CurrentRepo {
 	pub fn new(file_path: &Path) -> Result<Self, &'static str> {
-		let shows = parse(file_path)?;
+		let current = parse(file_path)?;
 		Ok(Self {
-			shows,
+			current,
 			file_path: file_path.to_path_buf(),
 		})
 	}
 
 	fn get_mut_show(&mut self, show_name: &str) -> Result<&mut Show, String> {
-		match self.shows.get_mut(show_name) {
+		match self.current.get_mut(show_name) {
 			Some(show) => Ok(show),
-			None => Err(format!("couldn't find show {show_name} in shows model")),
+			None => Err(format!("couldn't find show {show_name} in current model")),
 		}
 	}
 
 	fn get_show(&self, show_name: &str) -> Result<&Show, String> {
-		match self.shows.get(show_name) {
+		match self.current.get(show_name) {
 			Some(show) => Ok(show),
-			None => Err(format!("couldn't find show {show_name} in shows model")),
+			None => Err(format!("couldn't find show {show_name} in current model")),
 		}
 	}
 
 	pub fn new_show(mut self, show_name: &str, link: &str) -> Result<(), String> {
-		self.shows.insert(show_name.to_owned(), Show::new(link));
+		self.current.insert(show_name.to_owned(), Show::new(link));
 		self.save()
 	}
 
 	pub fn list(&self, should_links: bool) -> Result<(), &'static str> {
-		let longest_title = match self.shows.keys().map(|show_name| show_name.len()).max() {
+		let longest_title = match self.current.keys().map(|show_name| show_name.len()).max() {
 			Some(length) => length,
 			None => return Err("you have no shows you're currently watching"),
 		};
 		// this unwrap is safe because we just confirmed the iterator wouldn't be empty
 		let biggest_episode = self
-			.shows
+			.current
 			.values()
 			.map(|show| show.episode.to_string().len())
 			.max()
 			.unwrap();
 		let biggest_download = self
-			.shows
+			.current
 			.values()
 			.map(|show| show.downloaded.to_string().len())
 			.max()
 			.unwrap();
 		let mut link = String::from("");
-		for (show_name, show_obj) in self.shows.iter() {
+		for (show_name, show_obj) in self.current.iter() {
 			let title_diff = " ".repeat(longest_title - show_name.len());
 			let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
 			let download_diff =
@@ -98,7 +98,7 @@ impl ShowsRepo {
 	}
 
 	pub fn remove(mut self, show_name: &str) -> Result<(), String> {
-		if self.shows.remove(show_name).is_none() {
+		if self.current.remove(show_name).is_none() {
 			return Err(format!("couldn't find show {show_name}"));
 		}
 		self.save()
@@ -157,11 +157,11 @@ impl ShowsRepo {
 		let formatter = PrettyFormatter::with_indent(b"	");
 		let mut data = Vec::new();
 		let mut serializer = Serializer::with_formatter(&mut data, formatter);
-		if self.shows.serialize(&mut serializer).is_err() {
-			return Err("couldn't serialize shows model into json".to_owned());
+		if self.current.serialize(&mut serializer).is_err() {
+			return Err("couldn't serialize current model into json".to_owned());
 		};
 		if fs::write(self.file_path, data).is_err() {
-			return Err("failed to write to shows.json".to_owned());
+			return Err("failed to write to current.json".to_owned());
 		}
 		Ok(())
 	}
@@ -170,11 +170,11 @@ impl ShowsRepo {
 fn parse(file_path: &Path) -> Result<Shows, &'static str> {
 	let file = match File::open(file_path) {
 		Ok(file) => file,
-		Err(_) => return Err("couldn't open the shows file for reading"),
+		Err(_) => return Err("couldn't open current.json for reading"),
 	};
 	let reader = BufReader::new(file);
 	match serde_json::from_reader(reader) {
 		Ok(model) => Ok(model),
-		Err(_) => Err("couldn't parse shows.json into model"),
+		Err(_) => Err("couldn't parse current.json into model"),
 	}
 }

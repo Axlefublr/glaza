@@ -1,16 +1,16 @@
 use crate::sh::git_add_commit;
-use crate::show::model::ShowsRepo;
+use crate::show::model::CurrentRepo;
 use std::path::Path;
 use std::process::ExitCode;
 
 pub fn download(
 	show: &str,
 	episode: u32,
-	shows_model: ShowsRepo,
+	current_model: CurrentRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	if let Err(message) = shows_model.change_downloaded(show, episode) {
+	if let Err(message) = current_model.change_downloaded(show, episode) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	};
@@ -26,11 +26,11 @@ pub fn download(
 pub fn episode(
 	show: &str,
 	episode: u32,
-	shows_model: ShowsRepo,
+	current_model: CurrentRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	if let Err(message) = shows_model.change_episode(show, episode) {
+	if let Err(message) = current_model.change_episode(show, episode) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	};
@@ -46,11 +46,11 @@ pub fn episode(
 pub fn link(
 	show: &str,
 	link: &str,
-	shows_model: ShowsRepo,
+	current_model: CurrentRepo,
 	data_dir: &Path,
 	should_commit: bool,
 ) -> ExitCode {
-	if let Err(message) = shows_model.change_link(show, link) {
+	if let Err(message) = current_model.change_link(show, link) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
 	};

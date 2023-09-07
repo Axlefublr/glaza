@@ -7,7 +7,7 @@ use crate::sh::is_git_init;
 
 const EMPTY_JSON_OBJECT: &str = r"{}";
 const DATA_DIR: &str = "floral_barrel";
-const SHOWS_FILE: &str = "shows.json";
+const SHOWS_FILE: &str = "current.json";
 const WATCHED_FILE: &str = "watched.txt";
 const WATCH_LATER_FILE: &str = "watch-later.txt";
 
@@ -33,7 +33,7 @@ fn ensure_exists(file_path: &Path, contents: &str) -> Result<(), String> {
 
 #[derive(Debug)]
 pub struct DataFiles {
-	pub shows: PathBuf,
+	pub current: PathBuf,
 	pub watched: PathBuf,
 	pub watch_later: PathBuf,
 	pub floral_barrel: PathBuf,
@@ -42,11 +42,11 @@ pub struct DataFiles {
 impl DataFiles {
 	pub fn new() -> Self {
 		let floral_barrel = get_floral_barrel_dir();
-		let shows = floral_barrel.join(SHOWS_FILE);
+		let current = floral_barrel.join(SHOWS_FILE);
 		let watched = floral_barrel.join(WATCHED_FILE);
 		let watch_later = floral_barrel.join(WATCH_LATER_FILE);
 		Self {
-			shows,
+			current,
 			watched,
 			watch_later,
 			floral_barrel,
@@ -59,7 +59,7 @@ impl DataFiles {
 		if git_init && !is_git_init(&self.floral_barrel) {
 			sh::git_init(&self.floral_barrel)?;
 		}
-		ensure_exists(&self.shows, EMPTY_JSON_OBJECT)?;
+		ensure_exists(&self.current, EMPTY_JSON_OBJECT)?;
 		ensure_exists(&self.watched, "")?;
 		ensure_exists(&self.watch_later, "")?;
 		Ok(())

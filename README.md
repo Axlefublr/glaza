@@ -29,7 +29,7 @@ You get to decide which actions are big enough for you to commit, and which ones
 
 floral_barrel is basically an abstraction to interact with three files:
 
-### 1. shows.json
+### 1. current.json
 
 Contains the shows you're currently watching.
 
@@ -46,7 +46,7 @@ Both of those subcommands work by getting the link in the link property and conc
 
 By default, that link is printed to stdout. But if you provide the `--open`/`-o` flag, it will get opened in your $BROWSER
 
-Once you finish or drop a show, you can execute `show finish` (or `show drop`) to move it to your watched list, removing it from your shows.json
+Once you finish or drop a show, you can execute `show finish` (or `show drop`) to move it to your watched list, removing it from your current.json
 
 ### 2. watched.txt
 
@@ -60,7 +60,7 @@ So it's a good idea to mark a show as finished as soon as you actually do, to re
 
 To view all of your past watched shows, run `show past`
 
-If you added a show by mistake, and don't intend to actually watch it, you can use `show remove` to remove a show from your shows.json without putting it in your watched list
+If you added a show by mistake, and don't intend to actually watch it, you can use `show remove` to remove a show from your current.json without putting it in your watched list
 
 ### 3. watch-later.txt
 
@@ -68,7 +68,7 @@ A simple "watch later" file, that you can `list`, `add` or `remove` from.
 
 The cool thing about it is the abstraction subcommand of `wl start`.
 
-It lets you pick a show from your watch later list, remove it from there and create a new show in your shows.json.
+It lets you pick a show from your watch later list, remove it from there and create a new show in your current.json.
 
 Yes, this:
 ```
