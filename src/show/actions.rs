@@ -138,12 +138,7 @@ pub fn past(mut watched_model: WatchedRepo) -> ExitCode {
 	ExitCode::SUCCESS
 }
 
-pub fn remove(
-	show: &str,
-	current_model: CurrentRepo,
-	data_dir: &Path,
-	should_commit: bool,
-) -> ExitCode {
+pub fn remove(show: &str, current_model: CurrentRepo, data_dir: &Path, should_commit: bool) -> ExitCode {
 	if let Err(message) = current_model.remove(show) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;

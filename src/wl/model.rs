@@ -24,7 +24,8 @@ impl WlRepo {
 	}
 
 	pub fn remove(mut self, what: &str) -> Result<(), &'static str> {
-		self.contents = self.contents
+		self.contents = self
+			.contents
 			.lines()
 			.filter(|line| *line != what)
 			.collect::<Vec<_>>()

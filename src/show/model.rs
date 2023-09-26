@@ -84,8 +84,7 @@ impl CurrentRepo {
 		for (show_name, show_obj) in self.current.iter() {
 			let title_diff = " ".repeat(longest_title - show_name.len());
 			let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
-			let download_diff =
-				" ".repeat(biggest_download - show_obj.downloaded.to_string().len());
+			let download_diff = " ".repeat(biggest_download - show_obj.downloaded.to_string().len());
 			if should_links {
 				link = format!(" - {}", show_obj.link);
 			};
@@ -109,11 +108,7 @@ impl CurrentRepo {
 		self.save()
 	}
 
-	pub fn change_downloaded(
-		mut self,
-		show_name: &str,
-		new_downloaded: u32,
-	) -> Result<(), String> {
+	pub fn change_downloaded(mut self, show_name: &str, new_downloaded: u32) -> Result<(), String> {
 		self.get_mut_show(show_name)?.downloaded = new_downloaded;
 		self.save()
 	}

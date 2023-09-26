@@ -37,7 +37,14 @@ pub fn list(wl_model: WlRepo) -> ExitCode {
 	ExitCode::SUCCESS
 }
 
-pub fn start(show: &str, link: &str, wl_model: WlRepo, current_model: CurrentRepo, data_dir: &Path, should_commit: bool) -> ExitCode {
+pub fn start(
+	show: &str,
+	link: &str,
+	wl_model: WlRepo,
+	current_model: CurrentRepo,
+	data_dir: &Path,
+	should_commit: bool,
+) -> ExitCode {
 	if let Err(message) = wl_model.remove(show) {
 		eprintln!("{}", message);
 		return ExitCode::FAILURE;
