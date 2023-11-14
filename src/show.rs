@@ -42,6 +42,7 @@ pub enum ShowCommands {
 		show: String,
 	},
 	/// Start a new show
+	#[command(visible_alias = "start")]
 	New {
 		#[arg(short, long)]
 		show: String,
