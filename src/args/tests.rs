@@ -3,5 +3,5 @@ use clap::CommandFactory;
 
 #[test]
 fn verify_cli() {
-	Args::command().debug_assert()
+    Args::command().debug_assert()
 }
