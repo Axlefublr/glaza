@@ -141,6 +141,8 @@ You can use `-h`/`--help` anywhere! If you want to learn about the flags of a sp
 cargo install floral_barrel
 ```
 
+`cargo-binstall` and `cargo-quickinstall` are also supported
+
 ## Uninstallation
 
 ```
