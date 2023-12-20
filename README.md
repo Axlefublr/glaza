@@ -135,7 +135,27 @@ Commands:
 
 You can use `-h`/`--help` anywhere! If you want to learn about the flags of a specific subcommand, run something like `floral_barrel show watch --help`
 
-## Installation
+## Examples
+
+I watched the Baki anime, so I start not at chapter 1 of the manga. I make use of the `--git` flag to only make one commit for adding it.
+```
+floral_barrel show new -s "Baki Dou" -l "this would be the link"
+floral_barrel --git show set ep -s "Baki Dou" -e 69
+```
+Adding a name this long isn't that big of a deal because of shell history.
+```
+floral_barrel --git wl add -s 'Richard Hammack — Book of Proof'
+```
+The website I set initially isn't as good as another one I found, so I updated the link.
+```
+floral_barrel --git show set link -s "One Piece Manga" -l "this is once again a link"
+```
+Good movie.
+```
+floral_barrel --git show finish -s 'Lord of War'
+```
+
+## Install
 
 ```
 cargo install floral_barrel
@@ -143,7 +163,7 @@ cargo install floral_barrel
 
 `cargo-binstall` and `cargo-quickinstall` are also supported
 
-## Uninstallation
+## Uninstall
 
 ```
 cargo uninstall floral_barrel
