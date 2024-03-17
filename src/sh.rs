@@ -2,16 +2,16 @@ use std::env;
 use std::path::Path;
 use std::process::Command;
 
-// todo: only try to commit if the floral_barrel dir is a git directory
-// todo: commit everything, purely depending on the user specifying global -g flag
-// todo: git init the directory yourself
-pub fn git_add_commit(working_dir: &Path, message: String) -> Result<(), &'static str> {
+pub fn git_add_commit(
+    working_dir: &Path,
+    message: String,
+) -> Result<(), &'static str> {
     if Command::new("git")
-		.arg("add")
-		.arg(".") // todo: "files" vec, to only stage current on episode, finish, and drop changes
-		.current_dir(working_dir)
-		.output()
-		.is_err()
+        .arg("add")
+        .arg(".")
+        .current_dir(working_dir)
+        .output()
+        .is_err()
     {
         return Err("couldn't git add");
     }

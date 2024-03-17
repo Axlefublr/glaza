@@ -1,8 +1,9 @@
+use std::path::Path;
+use std::process::ExitCode;
+
 use crate::sh::git_add_commit;
 use crate::show::model::CurrentRepo;
 use crate::watched_model::WatchedRepo;
-use std::path::Path;
-use std::process::ExitCode;
 
 pub mod set;
 
@@ -18,7 +19,7 @@ pub fn watch(show: &str, open: bool, current_model: CurrentRepo) -> ExitCode {
             Err(message) => {
                 eprintln!("{}", message);
                 return ExitCode::FAILURE;
-            }
+            },
         };
     }
     ExitCode::SUCCESS
@@ -36,7 +37,7 @@ pub fn download(show: &str, open: bool, current_model: CurrentRepo) -> ExitCode 
             Err(message) => {
                 eprintln!("{}", message);
                 return ExitCode::FAILURE;
-            }
+            },
         }
     }
     ExitCode::SUCCESS
@@ -54,7 +55,7 @@ pub fn link(show: &str, open: bool, current_model: CurrentRepo) -> ExitCode {
             Err(message) => {
                 eprintln!("{}", message);
                 return ExitCode::FAILURE;
-            }
+            },
         }
     }
     ExitCode::SUCCESS
@@ -73,7 +74,9 @@ pub fn finish(
         return ExitCode::FAILURE;
     }
     if should_commit {
-        if let Err(message) = git_add_commit(data_dir, format!("finish -> {show}")) {
+        if let Err(message) =
+            git_add_commit(data_dir, format!("finish -> {show}"))
+        {
             eprintln!("{}", message);
             return ExitCode::FAILURE;
         }
@@ -94,7 +97,8 @@ pub fn drop(
         return ExitCode::FAILURE;
     }
     if should_commit {
-        if let Err(message) = git_add_commit(data_dir, format!("drop -> {show}")) {
+        if let Err(message) = git_add_commit(data_dir, format!("drop -> {show}"))
+        {
             eprintln!("{}", message);
             return ExitCode::FAILURE;
         }
@@ -114,7 +118,8 @@ pub fn new(
         return ExitCode::FAILURE;
     }
     if should_commit {
-        if let Err(message) = git_add_commit(data_dir, format!("start -> {show}")) {
+        if let Err(message) = git_add_commit(data_dir, format!("start -> {show}"))
+        {
             eprintln!("{}", message);
             return ExitCode::FAILURE;
         }
@@ -138,13 +143,20 @@ pub fn past(mut watched_model: WatchedRepo) -> ExitCode {
     ExitCode::SUCCESS
 }
 
-pub fn remove(show: &str, current_model: CurrentRepo, data_dir: &Path, should_commit: bool) -> ExitCode {
+pub fn remove(
+    show: &str,
+    current_model: CurrentRepo,
+    data_dir: &Path,
+    should_commit: bool,
+) -> ExitCode {
     if let Err(message) = current_model.remove(show) {
         eprintln!("{}", message);
         return ExitCode::FAILURE;
     };
     if should_commit {
-        if let Err(message) = git_add_commit(data_dir, format!("remove -> {show}")) {
+        if let Err(message) =
+            git_add_commit(data_dir, format!("remove -> {show}"))
+        {
             eprintln!("{}", message);
             return ExitCode::FAILURE;
         }

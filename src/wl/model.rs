@@ -3,7 +3,7 @@ use std::path::Path;
 use std::path::PathBuf;
 
 pub struct WlRepo {
-    contents: String,
+    contents:  String,
     file_path: PathBuf,
 }
 
@@ -17,7 +17,8 @@ impl WlRepo {
     }
 
     pub fn add(mut self, what: &str) -> Result<(), &'static str> {
-        let mut lines: Vec<String> = self.contents.lines().map(|line| line.to_owned()).collect();
+        let mut lines: Vec<String> =
+            self.contents.lines().map(|line| line.to_owned()).collect();
         lines.push(what.to_owned());
         self.contents = lines.join("\n");
         self.save()
@@ -38,7 +39,8 @@ impl WlRepo {
     }
 
     fn save(self) -> Result<(), &'static str> {
-        fs::write(self.file_path, self.contents).map_err(|_| "couldn't write to watch later file")
+        fs::write(self.file_path, self.contents)
+            .map_err(|_| "couldn't write to watch later file")
     }
 }
 

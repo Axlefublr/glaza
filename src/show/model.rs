@@ -1,8 +1,3 @@
-use crate::sh::open_in_browser;
-use serde::Deserialize;
-use serde::Serialize;
-use serde_json::ser::PrettyFormatter;
-use serde_json::ser::Serializer;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::File;
@@ -10,28 +5,35 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
+use serde::Deserialize;
+use serde::Serialize;
+use serde_json::ser::PrettyFormatter;
+use serde_json::ser::Serializer;
+
+use crate::sh::open_in_browser;
+
 type Shows = HashMap<String, Show>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Show {
-    pub episode: u32,
+    pub episode:    u32,
     pub downloaded: u32,
-    pub link: String,
+    pub link:       String,
 }
 
 impl Show {
     pub fn new(link: &str) -> Self {
         Self {
-            episode: 0,
+            episode:    0,
             downloaded: 0,
-            link: link.to_owned(),
+            link:       link.to_owned(),
         }
     }
 }
 
 pub struct CurrentRepo {
     pub current: Shows,
-    file_path: PathBuf,
+    file_path:   PathBuf,
 }
 
 impl CurrentRepo {
@@ -46,14 +48,18 @@ impl CurrentRepo {
     fn get_mut_show(&mut self, show_name: &str) -> Result<&mut Show, String> {
         match self.current.get_mut(show_name) {
             Some(show) => Ok(show),
-            None => Err(format!("couldn't find show {show_name} in current model")),
+            None => {
+                Err(format!("couldn't find show {show_name} in current model"))
+            },
         }
     }
 
     fn get_show(&self, show_name: &str) -> Result<&Show, String> {
         match self.current.get(show_name) {
             Some(show) => Ok(show),
-            None => Err(format!("couldn't find show {show_name} in current model")),
+            None => {
+                Err(format!("couldn't find show {show_name} in current model"))
+            },
         }
     }
 
@@ -63,11 +69,15 @@ impl CurrentRepo {
     }
 
     pub fn list(&self, should_links: bool) -> Result<(), &'static str> {
-        let longest_title = match self.current.keys().map(|show_name| show_name.len()).max() {
-            Some(length) => length,
-            None => return Err("you have no shows you're currently watching"),
-        };
-        // this unwrap is safe because we just confirmed the iterator wouldn't be empty
+        let longest_title =
+            match self.current.keys().map(|show_name| show_name.len()).max() {
+                Some(length) => length,
+                None => {
+                    return Err("you have no shows you're currently watching")
+                },
+            };
+        // this unwrap is safe because we just confirmed the iterator wouldn't be
+        // empty
         let biggest_episode = self
             .current
             .values()
@@ -83,8 +93,10 @@ impl CurrentRepo {
         let mut link = String::from("");
         for (show_name, show_obj) in self.current.iter() {
             let title_diff = " ".repeat(longest_title - show_name.len());
-            let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
-            let download_diff = " ".repeat(biggest_download - show_obj.downloaded.to_string().len());
+            let episode_diff =
+                " ".repeat(biggest_episode - show_obj.episode.to_string().len());
+            let download_diff = " "
+                .repeat(biggest_download - show_obj.downloaded.to_string().len());
             if should_links {
                 link = format!(" - {}", show_obj.link);
             };
@@ -103,22 +115,37 @@ impl CurrentRepo {
         self.save()
     }
 
-    pub fn change_episode(mut self, show_name: &str, new_episode: u32) -> Result<(), String> {
+    pub fn change_episode(
+        mut self,
+        show_name: &str,
+        new_episode: u32,
+    ) -> Result<(), String> {
         self.get_mut_show(show_name)?.episode = new_episode;
         self.save()
     }
 
-    pub fn change_downloaded(mut self, show_name: &str, new_downloaded: u32) -> Result<(), String> {
+    pub fn change_downloaded(
+        mut self,
+        show_name: &str,
+        new_downloaded: u32,
+    ) -> Result<(), String> {
         self.get_mut_show(show_name)?.downloaded = new_downloaded;
         self.save()
     }
 
-    pub fn change_link(mut self, show_name: &str, new_link: &str) -> Result<(), String> {
+    pub fn change_link(
+        mut self,
+        show_name: &str,
+        new_link: &str,
+    ) -> Result<(), String> {
         self.get_mut_show(show_name)?.link = new_link.to_owned();
         self.save()
     }
 
-    pub fn get_next_episode_link(&self, show_name: &str) -> Result<String, String> {
+    pub fn get_next_episode_link(
+        &self,
+        show_name: &str,
+    ) -> Result<String, String> {
         let show = self.get_show(show_name)?;
         Ok(format!("{}{}", show.link, show.episode + 1))
     }
@@ -128,7 +155,10 @@ impl CurrentRepo {
         Ok(())
     }
 
-    pub fn get_next_download_link(&self, show_name: &str) -> Result<String, String> {
+    pub fn get_next_download_link(
+        &self,
+        show_name: &str,
+    ) -> Result<String, String> {
         let show = self.get_show(show_name)?;
         Ok(format!("{}{}", show.link, show.downloaded + 1))
     }

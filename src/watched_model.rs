@@ -1,9 +1,10 @@
-use chrono::Utc;
 use std::fs::File;
 use std::fs::OpenOptions;
 use std::io::Read;
 use std::io::Write;
 use std::path::Path;
+
+use chrono::Utc;
 
 pub struct WatchedRepo {
     file: File,

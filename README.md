@@ -1,10 +1,12 @@
-# floral_barrel
+# glaza
+
+> ‘glaza’ means ‘eyes’ in russian. It's also what you use to watch shows!
 
 Track the shows you watch using your terminal!
 
-`floral_barrel` will create a directory where it will store its files.
+`glaza` will create a directory where it will store its files.
 
-That directory is `~/.local/share/floral_barrel` on linux and `%AppData%\floral_barrel` on windows.
+That directory is `~/.local/share/glaza` on linux and `%AppData%\glaza` on windows.
 
 Every time you specify the `-g`/`--git` flag, the action you do will be commited, if it writes to one of the files.
 
@@ -12,10 +14,10 @@ If you never specify the `--git` flag, the data directory won't be git initializ
 
 Example usage:
 ```
-floral_barrel -g show set ep -s "One Piece Live Action" -e 1
-floral_barrel show set ep -s "One Piece Live Action" -e 2
-floral_barrel --git show set ep -s "One Piece Live Action" -e 3
-floral_barrel -g show finish -s "One Piece Live Action"
+glaza -g show set ep -s "One Piece Live Action" -e 1
+glaza show set ep -s "One Piece Live Action" -e 2
+glaza --git show set ep -s "One Piece Live Action" -e 3
+glaza -g show finish -s "One Piece Live Action"
 ```
 
 You get to decide which actions are big enough for you to commit, and which ones are not.
@@ -26,7 +28,7 @@ You get to decide which actions are big enough for you to commit, and which ones
 275dafb watch ep1 -> One Piece Live Action
 ```
 
-floral_barrel is basically an abstraction to interact with three files:
+glaza is basically an abstraction to interact with three files:
 
 ### 1. current.json
 
@@ -71,13 +73,13 @@ It lets you pick a show from your watch later list, remove it from there and cre
 
 Yes, this:
 ```
-floral_barrel wl start -s "Show Name: The return of the beast season 2 reimagined" -l "https://yourOptionalLink.com"
+glaza wl start -s "Show Name: The return of the beast season 2 reimagined" -l "https://yourOptionalLink.com"
 ```
 
 Is eqivalent to running these two commands:
 ```
-floral_barrel wl remove -s "Show Name: The return of the beast season 2 reimagined"
-floral_barrel show new -s "Show Name: The return of the beast season 2 reimagined" -l "https://yourOptionalLink.com"
+glaza wl remove -s "Show Name: The return of the beast season 2 reimagined"
+glaza show new -s "Show Name: The return of the beast season 2 reimagined" -l "https://yourOptionalLink.com"
 ```
 
 Quite a long title isn't it? Having both actions in a single subcommand is gonna save you some time.
@@ -89,7 +91,7 @@ The link flag is optional in creating shows, because maybe you don't even have a
 ```
 A program to help you track shows you're watching
 
-Usage: floral_barrel [OPTIONS] <COMMAND>
+Usage: glaza [OPTIONS] <COMMAND>
 
 Commands:
   show  Commands to interact with the shows you're currently watching or have watched
@@ -101,7 +103,7 @@ Options:
   -V, --version  Print version
 ```
 ```
-Usage: floral_barrel show <COMMAND>
+Usage: glaza show <COMMAND>
 
 Commands:
   watch     Print or open the next episode's link
@@ -116,7 +118,7 @@ Commands:
   set       Update a show's properties
 ```
 ```
-Usage: floral_barrel show set <COMMAND>
+Usage: glaza show set <COMMAND>
 
 Commands:
   episode   Set the episode you just watched [aliases: ep]
@@ -124,7 +126,7 @@ Commands:
   link      Set the link
 ```
 ```
-Usage: floral_barrel wl <COMMAND>
+Usage: glaza wl <COMMAND>
 
 Commands:
   add     Add a new show to your watch later list
@@ -133,32 +135,32 @@ Commands:
   list    Print the entire contents of your watch later file
 ```
 
-You can use `-h`/`--help` anywhere! If you want to learn about the flags of a specific subcommand, run something like `floral_barrel show watch --help`
+You can use `-h`/`--help` anywhere! If you want to learn about the flags of a specific subcommand, run something like `glaza show watch --help`
 
 ## Examples
 
 I watched the Baki anime, so I start not at chapter 1 of the manga. I make use of the `--git` flag to only make one commit for adding it.
 ```
-floral_barrel show new -s "Baki Dou" -l "this would be the link"
-floral_barrel --git show set ep -s "Baki Dou" -e 69
+glaza show new -s "Baki Dou" -l "this would be the link"
+glaza --git show set ep -s "Baki Dou" -e 69
 ```
 Adding a name this long isn't that big of a deal because of shell history.
 ```
-floral_barrel --git wl add -s 'Richard Hammack — Book of Proof'
+glaza --git wl add -s 'Richard Hammack — Book of Proof'
 ```
 The website I set initially isn't as good as another one I found, so I updated the link.
 ```
-floral_barrel --git show set link -s "One Piece Manga" -l "this is once again a link"
+glaza --git show set link -s "One Piece Manga" -l "this is once again a link"
 ```
 Good movie.
 ```
-floral_barrel --git show finish -s 'Lord of War'
+glaza --git show finish -s 'Lord of War'
 ```
 
 ## Install
 
 ```
-cargo install floral_barrel
+cargo install glaza
 ```
 
 `cargo-binstall` and `cargo-quickinstall` are also supported
@@ -166,6 +168,6 @@ cargo install floral_barrel
 ## Uninstall
 
 ```
-cargo uninstall floral_barrel
-rm -fr ~/.local/share/floral_barrel
+cargo uninstall glaza
+rm -fr ~/.local/share/glaza
 ```
