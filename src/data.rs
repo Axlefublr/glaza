@@ -33,9 +33,9 @@ fn ensure_exists(file_path: &Path, contents: &str) -> Result<(), String> {
 
 #[derive(Debug)]
 pub struct DataFiles {
-    pub current:       PathBuf,
-    pub watched:       PathBuf,
-    pub watch_later:   PathBuf,
+    pub current:     PathBuf,
+    pub watched:     PathBuf,
+    pub watch_later: PathBuf,
     pub glaza:       PathBuf,
 }
 

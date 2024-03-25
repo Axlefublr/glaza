@@ -1,95 +1,97 @@
-use crate::args::Args;
+use std::error::Error;
+
 use args::UserCommands;
 use clap::Parser;
 use data::DataFiles;
-use show::model::CurrentRepo;
-use show::SetActions;
-use show::ShowCommands;
-use std::process::ExitCode;
-use watched_model::WatchedRepo;
-use wl::model::WlRepo;
-use wl::WlCommands;
+use models::show::CurrentRepo;
+use models::watched::WatchedRepo;
+use models::wl::WlRepo;
 
+use crate::args::Args;
+
+mod actions;
 mod args;
 mod data;
 mod sh;
-mod show;
-mod watched_model;
-mod wl;
+mod models {
+    pub mod show;
+    pub mod watched;
+    pub mod wl;
+}
 
-fn main() -> ExitCode {
+fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
     let data = DataFiles::new();
-    if let Err(message) = data.create(args.git) {
-        eprintln!("{}", message);
-        return ExitCode::FAILURE;
-    }
-    let current_model = match CurrentRepo::new(&data.current) {
-        Ok(current_model) => current_model,
-        Err(message) => {
-            eprintln!("{}", message);
-            return ExitCode::FAILURE;
-        }
-    };
-    let watched_model = match WatchedRepo::new(&data.watched) {
-        Ok(watched_model) => watched_model,
-        Err(message) => {
-            eprintln!("{}", message);
-            return ExitCode::FAILURE;
-        }
-    };
-    let wl_model = match WlRepo::new(&data.watch_later) {
-        Ok(wl_model) => wl_model,
-        Err(message) => {
-            eprintln!("{}", message);
-            return ExitCode::FAILURE;
-        }
-    };
+    data.create(args.git)?;
+    let current_model = CurrentRepo::new(&data.current)?;
+    let watched_model = WatchedRepo::new(&data.watched)?;
+    let wl_model = WlRepo::new(&data.watch_later)?;
     match args.action {
-        UserCommands::Show { action } => match action {
-            ShowCommands::Set { action } => match action {
-                SetActions::Download { show, episode } => {
-                    show::actions::set::download(&show, episode, current_model, &data.floral_barrel, args.git)
-                }
-                SetActions::Episode { show, episode } => {
-                    show::actions::set::episode(&show, episode, current_model, &data.floral_barrel, args.git)
-                }
-                SetActions::Link { show, link } => {
-                    show::actions::set::link(&show, &link, current_model, &data.floral_barrel, args.git)
-                }
-            },
-            ShowCommands::Watch { show, open } => show::actions::watch(&show, open, current_model),
-            ShowCommands::Download { show, open } => show::actions::download(&show, open, current_model),
-            ShowCommands::Link { show, open } => show::actions::link(&show, open, current_model),
-            ShowCommands::Finish { show } => {
-                show::actions::finish(&show, current_model, watched_model, &data.floral_barrel, args.git)
-            }
-            ShowCommands::Drop { show } => {
-                show::actions::drop(&show, current_model, watched_model, &data.floral_barrel, args.git)
-            }
-            ShowCommands::New { show, link } => {
-                show::actions::new(&show, &link, current_model, &data.floral_barrel, args.git)
-            }
-            ShowCommands::List { links } => show::actions::list(links, current_model),
-            ShowCommands::Past => show::actions::past(watched_model),
-            ShowCommands::Remove { show } => {
-                show::actions::remove(&show, current_model, &data.floral_barrel, args.git)
-            }
+        UserCommands::Go { show, web } => {
+            actions::show_get_episode(&show, web, current_model)
         },
-        UserCommands::Wl { action } => match action {
-            WlCommands::Add { show } => wl::actions::add(&show, wl_model, &data.floral_barrel, args.git),
-            WlCommands::List => wl::actions::list(wl_model),
-            WlCommands::Remove { show } => {
-                wl::actions::remove(&show, wl_model, &data.floral_barrel, args.git)
-            }
-            WlCommands::Start { show, link } => wl::actions::start(
-                &show,
-                &link,
-                wl_model,
-                current_model,
-                &data.floral_barrel,
-                args.git,
-            ),
+        UserCommands::Download { show, web } => {
+            actions::show_get_download(&show, web, current_model)
         },
+        UserCommands::Where { show, web } => {
+            actions::show_get_link(&show, web, current_model)
+        },
+        UserCommands::Finish { show, grab } => actions::show_finish(
+            &show,
+            grab,
+            current_model,
+            watched_model,
+            &data.glaza,
+            args.git,
+        ),
+        UserCommands::Drop { show, grab } => actions::show_drop(
+            &show,
+            grab,
+            current_model,
+            watched_model,
+            &data.glaza,
+            args.git,
+        ),
+        UserCommands::Start { show, link, grab } => actions::show_start(
+            &show,
+            &link,
+            grab,
+            current_model,
+            &data.glaza,
+            args.git,
+        ),
+        UserCommands::Shows { links } => actions::show_list(links, current_model),
+        UserCommands::Remove { show } => {
+            actions::show_remove(&show, current_model, &data.glaza, args.git)
+        },
+        UserCommands::Episode { show, episode } => actions::show_set_episode(
+            &show,
+            episode,
+            current_model,
+            &data.glaza,
+            args.git,
+        ),
+        UserCommands::Save { show, episode } => actions::show_set_downloaded(
+            &show,
+            episode,
+            current_model,
+            &data.glaza,
+            args.git,
+        ),
+        UserCommands::Link { show, link } => actions::show_set_link(
+            &show,
+            &link,
+            current_model,
+            &data.glaza,
+            args.git,
+        ),
+        UserCommands::Add { show } => {
+            actions::wl_add(&show, wl_model, &data.glaza, args.git)
+        },
+        UserCommands::Discard { show } => {
+            actions::wl_discard(&show, wl_model, &data.glaza, args.git)
+        },
+        UserCommands::Wl => actions::wl_list(wl_model),
+        UserCommands::Watched => actions::watched_list(watched_model),
     }
 }
