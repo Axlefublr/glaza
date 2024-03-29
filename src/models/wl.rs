@@ -24,6 +24,17 @@ impl WlRepo {
         self.save()
     }
 
+    pub fn has(&self, what: &str) -> bool {
+        self.contents.lines().any(|line| line == what)
+    }
+
+    pub fn matches(&self, what: &str) -> Option<&str> {
+        if let Some(show) = self.contents.lines().find(|line| *line == what) {
+            return Some(show);
+        }
+        None
+    }
+
     pub fn remove(mut self, what: &str) -> Result<(), &'static str> {
         self.contents = self
             .contents

@@ -1,6 +1,16 @@
 use clap::Parser;
 use clap::Subcommand;
 
+/// A lot of subcommands take `show` as an argument.
+/// How it's interpreted is slightly different per subcommand, to make for a
+/// better user experience.
+/// `go`, `download`, `where`, `remove`, `episode`, `save`, `link`, `discard` —
+/// all assume that the show already exists. So the way it's interpreted:
+/// 1. If `--index`/`-i` flag is present, it is used, ignoring the value specified for `show`.
+/// 2. If the show title directly matches to an existing one, it is used
+/// 3. Otherwise, the *first* one that matches is used. Keep in mind that the
+///    order of shows is the same as the output of `shows` or `wl`, depending on
+///    what the subcommand is dealing with.
 #[derive(Parser)]
 #[command(author, version, about)]
 pub struct Args {
@@ -18,7 +28,8 @@ pub enum UserCommands {
     /// This won't work if a number appended on the link doesn't result in that
     /// episode's url.
     #[command(visible_alias = "next")]
-    Go {
+    #[command(visible_alias = "go")]
+    Watch {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
@@ -27,8 +38,8 @@ pub enum UserCommands {
     /// Print the next download link.
     /// Works the same as the `go` subcommand, except the `saved` episode is
     /// appended instead.
-    #[command(visible_alias = "dn")]
-    Download {
+    #[command(visible_alias = "install")]
+    Save {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
@@ -98,11 +109,12 @@ pub enum UserCommands {
     #[command(visible_alias = "ep")]
     Episode { show: String, episode: u32 },
     /// Set the episode you just downloaded.
-    #[command(visible_alias = "sv")]
-    Save { show: String, episode: u32 },
+    #[command(visible_alias = "dn")]
+    Download { show: String, episode: u32 },
     /// Update the link of a show.
     Link { show: String, link: String },
     /// Add a new show to your watch later list.
+    #[command(visible_alias = "later")]
     Add { show: String },
     /// Remove a show from your watch later list.
     Discard { show: String },

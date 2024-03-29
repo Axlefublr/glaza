@@ -6,10 +6,10 @@ use data::DataFiles;
 use models::show::CurrentRepo;
 use models::watched::WatchedRepo;
 use models::wl::WlRepo;
+use sh::git_add_commit;
 
 use crate::args::Args;
 
-mod actions;
 mod args;
 mod data;
 mod sh;
@@ -23,75 +23,116 @@ fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
     let data = DataFiles::new();
     data.create(args.git)?;
-    let current_model = CurrentRepo::new(&data.current)?;
-    let watched_model = WatchedRepo::new(&data.watched)?;
-    let wl_model = WlRepo::new(&data.watch_later)?;
+    let mut current_model = CurrentRepo::new(&data.current)?;
+    let mut watched_model = WatchedRepo::new(&data.watched)?;
+    let mut wl_model = WlRepo::new(&data.watch_later)?;
     match args.action {
-        UserCommands::Go { show, web } => {
-            actions::show_get_episode(&show, web, current_model)
+        UserCommands::Watch { show, web } => {
+            if web {
+                current_model.open_next_episode_link(&show)?;
+            } else {
+                eprintln!("{}", current_model.get_next_episode_link(&show)?);
+            }
+            Ok(())
         },
-        UserCommands::Download { show, web } => {
-            actions::show_get_download(&show, web, current_model)
+        UserCommands::Save { show, web } => {
+            if web {
+                current_model.open_next_download_link(&show)?;
+            } else {
+                eprintln!("{}", current_model.get_next_download_link(&show)?);
+            }
+            Ok(())
         },
         UserCommands::Where { show, web } => {
-            actions::show_get_link(&show, web, current_model)
+            if web {
+                current_model.open_link(&show)?;
+            } else {
+                println!("{}", current_model.get_link(&show)?);
+            }
+            Ok(())
         },
-        UserCommands::Finish { show, grab } => actions::show_finish(
-            &show,
-            grab,
-            current_model,
-            watched_model,
-            &data.glaza,
-            args.git,
-        ),
-        UserCommands::Drop { show, grab } => actions::show_drop(
-            &show,
-            grab,
-            current_model,
-            watched_model,
-            &data.glaza,
-            args.git,
-        ),
-        UserCommands::Start { show, link, grab } => actions::show_start(
-            &show,
-            &link,
-            grab,
-            current_model,
-            &data.glaza,
-            args.git,
-        ),
-        UserCommands::Shows { links } => actions::show_list(links, current_model),
+        UserCommands::Finish { show, grab } => {
+            let _ = current_model.remove(&show);
+            if grab {
+                wl_model.remove(&show)?;
+            }
+            watched_model.finish(&show)?;
+            if args.git {
+                git_add_commit(&data.glaza, format!("finish -> {show}"))?;
+            }
+            Ok(())
+        },
+        UserCommands::Drop { show, grab } => {
+            let _ = current_model.remove(&show);
+            watched_model.drop(&show)?;
+            if args.git {
+                git_add_commit(&data.glaza, format!("drop -> {show}"))?;
+            }
+            Ok(())
+        },
+        UserCommands::Start { show, link, grab } => {
+            current_model.new_show(&show, &link)?;
+            if args.git {
+                git_add_commit(&data.glaza, format!("start -> {show}"))?;
+            }
+            Ok(())
+        },
+        UserCommands::Shows { links } => Ok(current_model.list(links)?),
         UserCommands::Remove { show } => {
-            actions::show_remove(&show, current_model, &data.glaza, args.git)
+            current_model.remove(&show)?;
+            if args.git {
+                git_add_commit(&data.glaza, format!("remove -> {show}"))?;
+            }
+            Ok(())
         },
-        UserCommands::Episode { show, episode } => actions::show_set_episode(
-            &show,
-            episode,
-            current_model,
-            &data.glaza,
-            args.git,
-        ),
-        UserCommands::Save { show, episode } => actions::show_set_downloaded(
-            &show,
-            episode,
-            current_model,
-            &data.glaza,
-            args.git,
-        ),
-        UserCommands::Link { show, link } => actions::show_set_link(
-            &show,
-            &link,
-            current_model,
-            &data.glaza,
-            args.git,
-        ),
+        UserCommands::Episode { show, episode } => {
+            current_model.change_episode(&show, episode)?;
+            if args.git {
+                git_add_commit(
+                    &data.glaza,
+                    format!("watch ep{episode} -> {show}"),
+                )?
+            }
+            Ok(())
+        },
+        UserCommands::Download { show, episode } => {
+            current_model.change_downloaded(&show, episode)?;
+            if args.git {
+                git_add_commit(
+                    &data.glaza,
+                    format!("download ep{episode} -> {show}"),
+                )?;
+            }
+            Ok(())
+        },
+        UserCommands::Link { show, link } => {
+            current_model.change_link(&show, &link)?;
+            if args.git {
+                git_add_commit(
+                    &data.glaza,
+                    format!("update link -> {show} -> {link}"),
+                )?
+            }
+            Ok(())
+        },
         UserCommands::Add { show } => {
-            actions::wl_add(&show, wl_model, &data.glaza, args.git)
+            wl_model.add(&show)?;
+            if args.git {
+                git_add_commit(&data.glaza, format!("wl add -> {}", show))?;
+            }
+            Ok(())
         },
         UserCommands::Discard { show } => {
-            actions::wl_discard(&show, wl_model, &data.glaza, args.git)
+            wl_model.remove(&show)?;
+            if args.git {
+                git_add_commit(&data.glaza, format!("wl remove -> {}", show))?;
+            }
+            Ok(())
         },
-        UserCommands::Wl => actions::wl_list(wl_model),
-        UserCommands::Watched => actions::watched_list(watched_model),
+        UserCommands::Wl => {
+            wl_model.list();
+            Ok(())
+        },
+        UserCommands::Watched => Ok(watched_model.read()?),
     }
 }
