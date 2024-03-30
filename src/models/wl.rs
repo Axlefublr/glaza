@@ -2,6 +2,8 @@ use std::fs;
 use std::path::Path;
 use std::path::PathBuf;
 
+use super::ValidatedTitle;
+
 pub struct WlRepo {
     contents:  String,
     file_path: PathBuf,
@@ -16,29 +18,25 @@ impl WlRepo {
         })
     }
 
-    pub fn add(mut self, what: &str) -> Result<(), &'static str> {
+    pub fn normalize_show_pattern(&self, pattern: &str) -> Result<ValidatedTitle, String> {
+        ValidatedTitle::from_pattern(self.contents.lines().map(|line| line.to_owned()).collect(), pattern)
+    }
+
+    pub fn add(&mut self, what: &str) -> Result<(), String> {
+        if self.contents.lines().any(|line| line == what) {
+            return Err(format!("watch later list already contains: '{}'", what))
+        }
         let mut lines: Vec<String> = self.contents.lines().map(|line| line.to_owned()).collect();
         lines.push(what.to_owned());
         self.contents = lines.join("\n");
-        self.save()
+        Ok(self.save()?)
     }
 
-    // pub fn has(&self, what: &str) -> bool {
-    //     self.contents.lines().any(|line| line == what)
-    // }
-
-    // pub fn matches(&self, what: &str) -> Option<&str> {
-    //     if let Some(show) = self.contents.lines().find(|line| *line == what) {
-    //         return Some(show);
-    //     }
-    //     None
-    // }
-
-    pub fn remove(mut self, what: &str) -> Result<(), &'static str> {
+    pub fn remove(&mut self, show_title: &ValidatedTitle) -> Result<(), &'static str> {
         self.contents = self
             .contents
             .lines()
-            .filter(|line| *line != what)
+            .filter(|line| *line != show_title.as_str())
             .collect::<Vec<_>>()
             .join("\n");
         self.save()
@@ -48,8 +46,8 @@ impl WlRepo {
         println!("{}", self.contents.trim_end())
     }
 
-    fn save(self) -> Result<(), &'static str> {
-        fs::write(self.file_path, self.contents).map_err(|_| "couldn't write to watch later file")
+    fn save(&mut self) -> Result<(), &'static str> {
+        fs::write(&self.file_path, &self.contents).map_err(|_| "couldn't write to watch later file")
     }
 }
 

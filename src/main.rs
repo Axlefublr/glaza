@@ -32,7 +32,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
     data.create(args.git)?;
     let mut current_model = CurrentRepo::new(&data.current)?;
     let mut watched_model = WatchedRepo::new(&data.watched)?;
-    let wl_model = WlRepo::new(&data.watch_later)?;
+    let mut wl_model = WlRepo::new(&data.watch_later)?;
     match args.action {
         UserCommands::Watch { show, web } => {
             let show = current_model.normalize_show_pattern(&show)?;
@@ -63,8 +63,9 @@ fn _main() -> Result<(), Box<dyn Error>> {
         },
         UserCommands::Finish { show, grab, fresh } => {
             let show: String = if grab {
+                let show = wl_model.normalize_show_pattern(&show)?;
                 wl_model.remove(&show)?;
-                Default::default()
+                show.into()
             } else if !fresh {
                 let show = current_model.normalize_show_pattern(&show)?;
                 current_model.remove(&show)?;
@@ -80,8 +81,9 @@ fn _main() -> Result<(), Box<dyn Error>> {
         },
         UserCommands::Drop { show, grab, fresh } => {
             let show: String = if grab {
+                let show = wl_model.normalize_show_pattern(&show)?;
                 wl_model.remove(&show)?;
-                Default::default()
+                show.into()
             } else if !fresh {
                 let show = current_model.normalize_show_pattern(&show)?;
                 current_model.remove(&show)?;
@@ -96,13 +98,14 @@ fn _main() -> Result<(), Box<dyn Error>> {
             Ok(())
         },
         UserCommands::Start { show, link, grab } => {
-            let show: &str = if grab {
+            let show: String = if grab {
+                let show = wl_model.normalize_show_pattern(&show)?;
                 wl_model.remove(&show)?;
-                ""
+                show.into()
             } else {
-                &show
+                show
             };
-            current_model.new_show(show, &link)?;
+            current_model.new_show(&show, &link)?;
             if args.git {
                 git_add_commit(&data.glaza, format!("start -> {show}"))?;
             }
@@ -149,6 +152,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             Ok(())
         },
         UserCommands::Discard { show } => {
+            let show = wl_model.normalize_show_pattern(&show)?;
             wl_model.remove(&show)?;
             if args.git {
                 git_add_commit(&data.glaza, format!("wl remove -> {}", show))?;
