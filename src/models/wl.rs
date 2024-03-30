@@ -17,23 +17,22 @@ impl WlRepo {
     }
 
     pub fn add(mut self, what: &str) -> Result<(), &'static str> {
-        let mut lines: Vec<String> =
-            self.contents.lines().map(|line| line.to_owned()).collect();
+        let mut lines: Vec<String> = self.contents.lines().map(|line| line.to_owned()).collect();
         lines.push(what.to_owned());
         self.contents = lines.join("\n");
         self.save()
     }
 
-    pub fn has(&self, what: &str) -> bool {
-        self.contents.lines().any(|line| line == what)
-    }
+    // pub fn has(&self, what: &str) -> bool {
+    //     self.contents.lines().any(|line| line == what)
+    // }
 
-    pub fn matches(&self, what: &str) -> Option<&str> {
-        if let Some(show) = self.contents.lines().find(|line| *line == what) {
-            return Some(show);
-        }
-        None
-    }
+    // pub fn matches(&self, what: &str) -> Option<&str> {
+    //     if let Some(show) = self.contents.lines().find(|line| *line == what) {
+    //         return Some(show);
+    //     }
+    //     None
+    // }
 
     pub fn remove(mut self, what: &str) -> Result<(), &'static str> {
         self.contents = self
@@ -50,8 +49,7 @@ impl WlRepo {
     }
 
     fn save(self) -> Result<(), &'static str> {
-        fs::write(self.file_path, self.contents)
-            .map_err(|_| "couldn't write to watch later file")
+        fs::write(self.file_path, self.contents).map_err(|_| "couldn't write to watch later file")
     }
 }
 

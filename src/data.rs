@@ -54,8 +54,7 @@ impl DataFiles {
     }
 
     pub fn create(&self, git_init: bool) -> Result<(), String> {
-        fs::create_dir_all(&self.glaza)
-            .map_err(|_| format!("couldn't create {}", &self.glaza.display()))?;
+        fs::create_dir_all(&self.glaza).map_err(|_| format!("couldn't create {}", &self.glaza.display()))?;
         if git_init && !is_git_init(&self.glaza) {
             sh::git_init(&self.glaza)?;
         }

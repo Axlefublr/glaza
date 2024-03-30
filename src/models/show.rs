@@ -12,6 +12,8 @@ use serde_json::ser::Serializer;
 
 use crate::sh::open_in_browser;
 
+use super::ValidatedTitle;
+
 type Shows = HashMap<String, Show>;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,8 +34,8 @@ impl Show {
 }
 
 pub struct CurrentRepo {
-    pub current: Shows,
-    file_path:   PathBuf,
+    current:   Shows,
+    file_path: PathBuf,
 }
 
 impl CurrentRepo {
@@ -45,37 +47,93 @@ impl CurrentRepo {
         })
     }
 
-    fn get_mut_show(&mut self, show_name: &str) -> Result<&mut Show, String> {
-        match self.current.get_mut(show_name) {
-            Some(show) => Ok(show),
-            None => {
-                Err(format!("couldn't find show {show_name} in current model"))
+    pub fn normalize_show_pattern(&self, pattern: &str) -> Result<ValidatedTitle, String> {
+        let lowercase_pattern = pattern.to_lowercase();
+
+        for key in self.current.keys() {
+            if key == pattern {
+                eprintln!("successful exact case-sensitive match: {}", key);
+                return Ok(ValidatedTitle(key.to_owned()));
+            }
+        }
+
+        for key in self.current.keys() {
+            if key.to_lowercase() == lowercase_pattern {
+                eprintln!("successful exact case-insensitive match: {}", key);
+                return Ok(ValidatedTitle(key.to_owned()));
+            }
+        }
+
+        let mut candidates: Vec<_> = self
+            .current
+            .keys()
+            .filter(|&show| show.to_lowercase().contains(&lowercase_pattern))
+            .collect();
+
+        if candidates.is_empty() {
+            return Err("unsuccessful case-insensitive substring match".into());
+        }
+
+        let insensitive_candidates = candidates.clone();
+        let mut retained = false;
+        if candidates.len() > 1 {
+            candidates.retain(|&show| show.contains(pattern));
+            retained = true;
+        }
+
+        match candidates.len() {
+            0 => Err(format!(
+            "case-insensitive substring match (too many): '{}'\nand then, unsuccessful case-sensitive substring match",
+                insensitive_candidates
+                    .iter()
+                    .map(|candidate| *candidate as &str)
+                    .collect::<Vec<&str>>()
+                    .join("', '")
+            )),
+            1 => {
+                // if we got here without retaining, that means we matched precisely a single show
+                // case-insensitively.
+                // if we did retain, that means we could only get to precisely 1 show once we
+                // searched case-sensitively
+                eprintln!("successful case-{}sensitive substring match: '{}'", if retained { "" } else { "in" } , candidates[0]);
+                Ok(ValidatedTitle(candidates[0].to_owned()))
             },
+            _ => Err(format!(
+                "case-insensitive substring match (too many): '{}'\nand then, case-sensitive substring match (too many): '{}'",
+                insensitive_candidates
+                    .iter()
+                    .map(|candidate| *candidate as &str)
+                    .collect::<Vec<&str>>()
+                    .join("', '"),
+                candidates
+                    .iter()
+                    .map(|candidate| *candidate as &str)
+                    .collect::<Vec<&str>>()
+                    .join("', '")
+            )),
         }
     }
 
-    fn get_show(&self, show_name: &str) -> Result<&Show, String> {
-        match self.current.get(show_name) {
-            Some(show) => Ok(show),
-            None => {
-                Err(format!("couldn't find show {show_name} in current model"))
-            },
-        }
+    fn get_mut_show(&mut self, show_title: &ValidatedTitle) -> &mut Show {
+        self.current
+            .get_mut(&show_title.0)
+            .unwrap()
     }
 
-    pub fn new_show(mut self, show_name: &str, link: &str) -> Result<(), String> {
-        self.current.insert(show_name.to_owned(), Show::new(link));
+    fn get_show(&self, show_title: &ValidatedTitle) -> &Show {
+        self.current.get(&show_title.0).unwrap()
+    }
+
+    pub fn new_show(&mut self, show_title: &str, link: &str) -> Result<(), String> {
+        self.current.insert(show_title.to_owned(), Show::new(link));
         self.save()
     }
 
     pub fn list(&self, should_links: bool) -> Result<(), &'static str> {
-        let longest_title =
-            match self.current.keys().map(|show_name| show_name.len()).max() {
-                Some(length) => length,
-                None => {
-                    return Err("you have no shows you're currently watching")
-                },
-            };
+        let longest_title = match self.current.keys().map(|show_name| show_name.len()).max() {
+            Some(length) => length,
+            None => return Err("you have no shows you're currently watching"),
+        };
         // this unwrap is safe because we just confirmed the iterator wouldn't be
         // empty
         let biggest_episode = self
@@ -91,101 +149,79 @@ impl CurrentRepo {
             .max()
             .unwrap();
         let mut link = String::from("");
-        for (show_name, show_obj) in self.current.iter() {
-            let title_diff = " ".repeat(longest_title - show_name.len());
-            let episode_diff =
-                " ".repeat(biggest_episode - show_obj.episode.to_string().len());
-            let download_diff = " "
-                .repeat(biggest_download - show_obj.downloaded.to_string().len());
+        for (show_title, show_obj) in self.current.iter() {
+            let title_diff = " ".repeat(longest_title - show_title.len());
+            let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
+            let download_diff = " ".repeat(biggest_download - show_obj.downloaded.to_string().len());
             if should_links {
                 link = format!(" - {}", show_obj.link);
             };
             println!(
-                "{show_name}{title_diff} - ep{}{episode_diff} - dn{}{download_diff}{}",
+                "{show_title}{title_diff} - ep{}{episode_diff} - dn{}{download_diff}{}",
                 show_obj.episode, show_obj.downloaded, link
             );
         }
         Ok(())
     }
 
-    pub fn remove(mut self, show_name: &str) -> Result<(), String> {
-        if self.current.remove(show_name).is_none() {
-            return Err(format!("couldn't find show {show_name}"));
-        }
+    pub fn remove(&mut self, show_title: &ValidatedTitle) -> Result<(), String> {
+        self.current.remove(&show_title.0).unwrap();
         self.save()
     }
 
-    pub fn change_episode(
-        mut self,
-        show_name: &str,
-        new_episode: u32,
-    ) -> Result<(), String> {
-        self.get_mut_show(show_name)?.episode = new_episode;
+    pub fn change_episode(&mut self, show_title: &ValidatedTitle, new_episode: u32) -> Result<(), String> {
+        self.get_mut_show(show_title).episode = new_episode;
         self.save()
     }
 
-    pub fn change_downloaded(
-        mut self,
-        show_name: &str,
-        new_downloaded: u32,
-    ) -> Result<(), String> {
-        self.get_mut_show(show_name)?.downloaded = new_downloaded;
+    pub fn change_downloaded(&mut self, show_title: &ValidatedTitle, new_downloaded: u32) -> Result<(), String> {
+        self.get_mut_show(show_title).downloaded = new_downloaded;
         self.save()
     }
 
-    pub fn change_link(
-        mut self,
-        show_name: &str,
-        new_link: &str,
-    ) -> Result<(), String> {
-        self.get_mut_show(show_name)?.link = new_link.to_owned();
+    pub fn change_link(&mut self, show_title: &ValidatedTitle, new_link: &str) -> Result<(), String> {
+        self.get_mut_show(show_title).link = new_link.to_owned();
         self.save()
     }
 
-    pub fn get_next_episode_link(
-        &self,
-        show_name: &str,
-    ) -> Result<String, String> {
-        let show = self.get_show(show_name)?;
-        Ok(format!("{}{}", show.link, show.episode + 1))
+    pub fn get_next_episode_link(&self, show_title: &ValidatedTitle) -> String {
+        let show = self.get_show(show_title);
+        format!("{}{}", show.link, show.episode + 1)
     }
 
-    pub fn open_next_episode_link(&self, show_name: &str) -> Result<(), String> {
-        open_in_browser(&self.get_next_episode_link(show_name)?)?;
+    pub fn open_next_episode_link(&self, show_title: &ValidatedTitle) -> Result<(), String> {
+        open_in_browser(&self.get_next_episode_link(show_title))?;
         Ok(())
     }
 
-    pub fn get_next_download_link(
-        &self,
-        show_name: &str,
-    ) -> Result<String, String> {
-        let show = self.get_show(show_name)?;
-        Ok(format!("{}{}", show.link, show.downloaded + 1))
+    pub fn get_next_download_link(&self, show_title: &ValidatedTitle) -> String {
+        let show = self.get_show(show_title);
+        format!("{}{}", show.link, show.downloaded + 1)
     }
 
-    pub fn open_next_download_link(&self, show_name: &str) -> Result<(), String> {
-        open_in_browser(&self.get_next_download_link(show_name)?)?;
+    pub fn open_next_download_link(&self, show_title: &ValidatedTitle) -> Result<(), String> {
+        open_in_browser(&self.get_next_download_link(show_title))?;
         Ok(())
     }
 
-    pub fn open_link(&self, show_name: &str) -> Result<(), String> {
-        open_in_browser(&self.get_link(show_name)?)?;
+    pub fn open_link(&self, show_title: &ValidatedTitle) -> Result<(), String> {
+        open_in_browser(&self.get_link(show_title))?;
         Ok(())
     }
 
-    pub fn get_link(&self, show_name: &str) -> Result<String, String> {
-        let show = self.get_show(show_name)?;
-        Ok(show.link.to_string())
+    pub fn get_link(&self, show_title: &ValidatedTitle) -> String {
+        let show = self.get_show(show_title);
+        show.link.to_string()
     }
 
-    pub fn save(self) -> Result<(), String> {
+    pub fn save(&mut self) -> Result<(), String> {
         let formatter = PrettyFormatter::with_indent(b"	");
         let mut data = Vec::new();
         let mut serializer = Serializer::with_formatter(&mut data, formatter);
         if self.current.serialize(&mut serializer).is_err() {
             return Err("couldn't serialize current model into json".to_owned());
         };
-        if fs::write(self.file_path, data).is_err() {
+        if fs::write(&self.file_path, data).is_err() {
             return Err("failed to write to current.json".to_owned());
         }
         Ok(())
