@@ -17,3 +17,4 @@ clap = { version = "4.4.1", features = ["derive", "wrap_help"] }
 dirs = "5.0.1"
 serde = { version = "1.0.188", features = ["derive"] }
 serde_yaml = "0.9.34"
+indexmap = { version = "1.7.0", features = ["serde-1"] }

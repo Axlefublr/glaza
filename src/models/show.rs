@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::OpenOptions;
@@ -5,6 +6,7 @@ use std::io::BufReader;
 use std::path::Path;
 use std::path::PathBuf;
 
+use indexmap::IndexMap;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -48,7 +50,7 @@ impl CurrentRepo {
         self.current.get(&show_title.0).unwrap()
     }
 
-    pub fn new_show(&mut self, show_title: &str, link: &str) -> Result<(), &'static str> {
+    pub fn new_show(mut self, show_title: &str, link: &str) -> Result<(), &'static str> {
         self.current.insert(show_title.to_owned(), Show::new(link));
         self.save()
     }
@@ -88,13 +90,13 @@ impl CurrentRepo {
         Ok(())
     }
 
-    pub fn remove(&mut self, show_title: &ValidatedTitle) -> Result<(), &'static str> {
+    pub fn remove(mut self, show_title: &ValidatedTitle) -> Result<(), &'static str> {
         self.current.remove(&show_title.0).unwrap();
         self.save()
     }
 
     pub fn change_episode(
-        &mut self,
+        mut self,
         show_title: &ValidatedTitle,
         new_episode: u32,
     ) -> Result<(), &'static str> {
@@ -103,7 +105,7 @@ impl CurrentRepo {
     }
 
     pub fn change_downloaded(
-        &mut self,
+        mut self,
         show_title: &ValidatedTitle,
         new_downloaded: u32,
     ) -> Result<(), &'static str> {
@@ -111,7 +113,7 @@ impl CurrentRepo {
         self.save()
     }
 
-    pub fn change_link(&mut self, show_title: &ValidatedTitle, new_link: &str) -> Result<(), &'static str> {
+    pub fn change_link(mut self, show_title: &ValidatedTitle, new_link: &str) -> Result<(), &'static str> {
         self.get_mut_show(show_title).link = new_link.to_owned();
         self.save()
     }
@@ -146,9 +148,16 @@ impl CurrentRepo {
         show.link.to_string()
     }
 
-    pub fn save(&mut self) -> Result<(), &'static str> {
-        let yaml =
-            serde_yaml::to_string(&self.current).map_err(|_| "couldn't serialize current model into yaml")?;
+    pub fn save(self) -> Result<(), &'static str> {
+        let mut entries: Vec<(String, Show)> = self.current.into_iter().collect();
+        entries.sort_by(|a, b| a.0.cmp(&b.0));
+
+        let mut sorted_shows = IndexMap::new();
+        for (key, value) in entries {
+            sorted_shows.insert(key, value);
+        }
+
+        let yaml = serde_yaml::to_string(&sorted_shows).map_err(|_| "couldn't serialize current model into yaml")?;
         fs::write(self.file_path.as_path(), yaml).map_err(|_| "failed to write to current.yml") // we ensure the file exists on creation of the type
     }
 }

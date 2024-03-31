@@ -29,7 +29,7 @@ fn main() -> ExitCode {
 fn _main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
     let data = DataFiles::build(args.git)?;
-    let mut current_model = CurrentRepo::try_from(data.current.as_path())?;
+    let current_model = CurrentRepo::try_from(data.current.as_path())?;
     let mut watched_model = WatchedRepo::try_from(data.watched.as_path())?;
     let mut wl_model = WlRepo::try_from(data.watch_later.as_path())?;
     match args.action {
