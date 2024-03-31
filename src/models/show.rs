@@ -91,10 +91,10 @@ impl CurrentRepo {
             let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
             let download_diff = " ".repeat(biggest_download - show_obj.downloaded.to_string().len());
             if should_links {
-                link = format!(" - {}", show_obj.link);
+                link = format!(" — {}", show_obj.link);
             };
             println!(
-                "{show_title}{title_diff} - ep{}{episode_diff} - dn{}{download_diff}{}",
+                "{show_title}{title_diff} — ep{}{episode_diff} — dn{}{download_diff}{}",
                 show_obj.episode, show_obj.downloaded, link
             );
         }
