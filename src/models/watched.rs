@@ -11,11 +11,6 @@ pub struct WatchedRepo {
 }
 
 impl WatchedRepo {
-    pub fn new(file_path: &Path) -> Result<Self, &'static str> {
-        let file = parse(file_path)?;
-        Ok(Self { file })
-    }
-
     pub fn read(&mut self) -> Result<(), &'static str> {
         let mut contents = String::new();
         if self.file.read_to_string(&mut contents).is_err() {
@@ -42,9 +37,16 @@ impl WatchedRepo {
     }
 }
 
-pub fn parse(file_path: &Path) -> Result<File, &'static str> {
-    match OpenOptions::new().append(true).read(true).open(file_path) {
-        Ok(file) => Ok(file),
-        Err(_) => Err("couldn't open the watched file for writing"),
+impl TryFrom<&Path> for WatchedRepo {
+    type Error = &'static str;
+
+    fn try_from(file_path: &Path) -> Result<Self, Self::Error> {
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true)
+            .read(true)
+            .open(file_path)
+            .map_err(|_| "could not create and/or open the watched file")?;
+        Ok(Self { file })
     }
 }

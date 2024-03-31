@@ -13,8 +13,8 @@ use crate::args::Args;
 
 mod args;
 mod data;
-mod sh;
 mod models;
+mod sh;
 
 fn main() -> ExitCode {
     match _main() {
@@ -28,11 +28,10 @@ fn main() -> ExitCode {
 
 fn _main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
-    let data = DataFiles::new();
-    data.create(args.git)?;
-    let mut current_model = CurrentRepo::new(&data.current)?;
-    let mut watched_model = WatchedRepo::new(&data.watched)?;
-    let mut wl_model = WlRepo::new(&data.watch_later)?;
+    let data = DataFiles::build(args.git)?;
+    let mut current_model = CurrentRepo::try_from(data.current.as_path())?;
+    let mut watched_model = WatchedRepo::try_from(data.watched.as_path())?;
+    let mut wl_model = WlRepo::try_from(data.watch_later.as_path())?;
     match args.action {
         UserCommands::Watch { show, web } => {
             let show = current_model.normalize_show_pattern(&show)?;
@@ -75,7 +74,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             };
             watched_model.finish(&show)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("finish -> {show}"))?;
+                git_add_commit(&data.data_dir, format!("finish -> {show}"))?;
             }
             Ok(())
         },
@@ -93,7 +92,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             };
             watched_model.drop(&show)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("drop -> {show}"))?;
+                git_add_commit(&data.data_dir, format!("drop -> {show}"))?;
             }
             Ok(())
         },
@@ -107,7 +106,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             };
             current_model.new_show(&show, &link)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("start -> {show}"))?;
+                git_add_commit(&data.data_dir, format!("start -> {show}"))?;
             }
             Ok(())
         },
@@ -116,7 +115,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             let show = current_model.normalize_show_pattern(&show)?;
             current_model.remove(&show)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("remove -> {show}"))?;
+                git_add_commit(&data.data_dir, format!("remove -> {show}"))?;
             }
             Ok(())
         },
@@ -124,7 +123,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             let show = current_model.normalize_show_pattern(&show)?;
             current_model.change_episode(&show, episode)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("watch ep{episode} -> {show}"))?
+                git_add_commit(&data.data_dir, format!("watch ep{episode} -> {show}"))?
             }
             Ok(())
         },
@@ -132,7 +131,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             let show = current_model.normalize_show_pattern(&show)?;
             current_model.change_downloaded(&show, episode)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("download ep{episode} -> {show}"))?;
+                git_add_commit(&data.data_dir, format!("download ep{episode} -> {show}"))?;
             }
             Ok(())
         },
@@ -140,14 +139,14 @@ fn _main() -> Result<(), Box<dyn Error>> {
             let show = current_model.normalize_show_pattern(&show)?;
             current_model.change_link(&show, &link)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("update link -> {show} -> {link}"))?
+                git_add_commit(&data.data_dir, format!("update link -> {show} -> {link}"))?
             }
             Ok(())
         },
         UserCommands::Add { show } => {
             wl_model.add(&show)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("wl add -> {}", show))?;
+                git_add_commit(&data.data_dir, format!("wl add -> {}", show))?;
             }
             Ok(())
         },
@@ -155,7 +154,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             let show = wl_model.normalize_show_pattern(&show)?;
             wl_model.remove(&show)?;
             if args.git {
-                git_add_commit(&data.glaza, format!("wl remove -> {}", show))?;
+                git_add_commit(&data.data_dir, format!("wl remove -> {}", show))?;
             }
             Ok(())
         },

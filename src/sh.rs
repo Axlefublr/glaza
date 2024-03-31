@@ -27,7 +27,10 @@ pub fn git_add_commit(working_dir: &Path, message: String) -> Result<(), &'stati
 
 pub fn open_in_browser(link: &str) -> Result<(), &'static str> {
     let browser = get_browser()?;
-    Command::new(browser).arg(link).output().unwrap();
+    Command::new(browser)
+        .arg(link)
+        .output()
+        .or(Err("browser specified in $BROWSER is not in $PATH."))?;
     Ok(())
 }
 

@@ -36,7 +36,8 @@ impl ValidatedTitle {
             }
         }
 
-        let mut candidates: Vec<_> = titles.iter()
+        let mut candidates: Vec<_> = titles
+            .iter()
             .filter(|&show| show.to_lowercase().contains(&lowercase_pattern))
             .collect();
 

@@ -1,4 +1,6 @@
 use std::fs;
+use std::fs::OpenOptions;
+use std::io::Read;
 use std::path::Path;
 use std::path::PathBuf;
 
@@ -10,21 +12,16 @@ pub struct WlRepo {
 }
 
 impl WlRepo {
-    pub fn new(file_path: &Path) -> Result<Self, &'static str> {
-        let contents = parse(file_path)?;
-        Ok(Self {
-            file_path: file_path.to_path_buf(),
-            contents,
-        })
-    }
-
     pub fn normalize_show_pattern(&self, pattern: &str) -> Result<ValidatedTitle, String> {
-        ValidatedTitle::from_pattern(self.contents.lines().map(|line| line.to_owned()).collect(), pattern)
+        ValidatedTitle::from_pattern(
+            self.contents.lines().map(|line| line.to_owned()).collect(),
+            pattern,
+        )
     }
 
     pub fn add(&mut self, what: &str) -> Result<(), String> {
         if self.contents.lines().any(|line| line == what) {
-            return Err(format!("watch later list already contains: '{}'", what))
+            return Err(format!("watch later list already contains: '{}'", what));
         }
         let mut lines: Vec<String> = self.contents.lines().map(|line| line.to_owned()).collect();
         lines.push(what.to_owned());
@@ -51,6 +48,22 @@ impl WlRepo {
     }
 }
 
-pub fn parse(file_path: &Path) -> Result<String, &'static str> {
-    fs::read_to_string(file_path).map_err(|_| "couldn't read watch later file")
+impl TryFrom<&Path> for WlRepo {
+    type Error = &'static str;
+
+    fn try_from(file_path: &Path) -> Result<Self, Self::Error> {
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .read(true)
+            .open(file_path)
+            .map_err(|_| "couldn't create and/or open the watch later file")?;
+        let mut contents = String::new();
+        file.read_to_string(&mut contents)
+            .map_err(|_| "couldn't read watch later file, despite it existing")?;
+        Ok(Self {
+            file_path: file_path.to_path_buf(),
+            contents,
+        })
+    }
 }
