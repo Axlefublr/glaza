@@ -46,11 +46,20 @@ pub enum UserCommands {
         #[arg(short, long)]
         web:  bool,
     },
-    /// Print the link of a show.
-    /// This is most useful for shows that don't support `watch` & `save` due to
+    /// Print the episode link of a show.
+    /// This is most useful for shows that don't support `watch` due to
     /// having non-standard urls.
     #[command(visible_alias = "h")]
-    Where {
+    PLink {
+        show: String,
+        /// Open the link in your $BROWSER instead of printing it.
+        #[arg(short, long)]
+        web:  bool,
+    },
+    /// Print the download link of a show.
+    /// This is most useful for shows that don't support `save` due to
+    /// having non-standard urls.
+    PDLink {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
@@ -100,12 +109,20 @@ pub enum UserCommands {
     Start {
         show: String,
         /// Optional link to where you're going to be watching the show.
-        /// If you want to make use of the `go` & `download` features, cut the
+        /// If you want to make use of the `watch` subcommand, cut the
         /// link so that if you appended a number after it, you'd get the
         /// link to that episode. Not all links work like that, in which
-        /// case the features will be unavailable.
-        #[arg(default_value_t = String::from(""))]
-        link: String,
+        /// case the feature will be unavailable.
+        /// If this link is the only one set, it will be used as a fallback
+        /// for when subcommands expect a download link.
+        #[arg(short, long)]
+        link: Option<String>,
+        /// Same as the `link` flag, but for the download link instead.
+        /// This link is used for the `save` subcommand.
+        /// If this link is the only one set, it will be used as a fallback
+        /// for when subcommands expect an episode link.
+        #[arg(short, long)]
+        dlink: Option<String>,
         /// Remove the show from the watch later list, if it's there.
         /// If it's not there, return an error.
         /// This is to help you realize if you misspelled a show title.
@@ -131,9 +148,15 @@ pub enum UserCommands {
     /// Set the episode you just downloaded.
     #[command(visible_alias = "dn")]
     Download { show: String, episode: u32 },
-    /// Update the link of a show.
+    /// Update the episode link of a show.
+    /// It will be used for the `watch` and `plink` subcommands.
+    /// And also, as a fallback if you don't define a download link.
     #[command(visible_alias = "ln")]
     Link { show: String, link: String },
+    /// Update the download link of a show.
+    /// It will be used for the `save` and `pdlink` subcommands.
+    /// And also, as a fallback if you don't define an episode link.
+    DLink { show: String, link: String },
     /// Add a new show to your watch later list.
     #[command(visible_alias = "later")]
     #[command(visible_alias = "a")]

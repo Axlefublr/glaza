@@ -55,6 +55,7 @@ impl TryFrom<&Path> for WlRepo {
         let mut file = OpenOptions::new()
             .write(true)
             .create(true)
+            .truncate(false)
             .read(true)
             .open(file_path)
             .map_err(|_| "couldn't create and/or open the watch later file")?;

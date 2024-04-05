@@ -51,12 +51,21 @@ fn _main() -> Result<(), Box<dyn Error>> {
             }
             Ok(())
         },
-        UserCommands::Where { show, web } => {
+        UserCommands::PLink { show, web } => {
             let show = current_model.normalize_show_pattern(&show)?;
             if web {
-                current_model.open_link(&show)?;
+                current_model.open_link(&show, false)?;
             } else {
-                println!("{}", current_model.get_link(&show));
+                println!("{}", current_model.get_link(&show, false));
+            }
+            Ok(())
+        },
+        UserCommands::PDLink { show, web } => {
+            let show = current_model.normalize_show_pattern(&show)?;
+            if web {
+                current_model.open_link(&show, true)?;
+            } else {
+                println!("{}", current_model.get_link(&show, true));
             }
             Ok(())
         },
@@ -96,7 +105,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             }
             Ok(())
         },
-        UserCommands::Start { show, link, grab } => {
+        UserCommands::Start { show, link, dlink, grab } => {
             let show: String = if grab {
                 let show = wl_model.normalize_show_pattern(&show)?;
                 wl_model.remove(&show)?;
@@ -104,7 +113,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             } else {
                 show
             };
-            current_model.new_show(&show, &link)?;
+            current_model.new_show(&show, link.as_ref(), dlink.as_ref())?;
             if args.git {
                 git_add_commit(&data.data_dir, format!("start -> {show}"))?;
             }
@@ -137,9 +146,17 @@ fn _main() -> Result<(), Box<dyn Error>> {
         },
         UserCommands::Link { show, link } => {
             let show = current_model.normalize_show_pattern(&show)?;
-            current_model.change_link(&show, &link)?;
+            current_model.change_link(&show, &link, false)?;
             if args.git {
                 git_add_commit(&data.data_dir, format!("update link -> {show} -> {link}"))?
+            }
+            Ok(())
+        },
+        UserCommands::DLink { show, link } => {
+            let show = current_model.normalize_show_pattern(&show)?;
+            current_model.change_link(&show, &link, true)?;
+            if args.git {
+                git_add_commit(&data.data_dir, format!("update dlink -> {show} -> {link}"))?
             }
             Ok(())
         },

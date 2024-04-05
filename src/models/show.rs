@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use std::collections::HashMap;
 use std::fs;
 use std::fs::OpenOptions;
@@ -19,16 +18,33 @@ type Shows = HashMap<String, Show>;
 pub struct Show {
     pub episode:    u32,
     pub downloaded: u32,
-    pub link:       String,
+    pub link:       Option<String>,
+    pub dlink:      Option<String>,
 }
 
 impl Show {
-    pub fn new(link: &str) -> Self {
+    pub fn new(link: Option<&String>, dlink: Option<&String>) -> Self {
         Self {
             episode:    0,
             downloaded: 0,
-            link:       link.to_owned(),
+            link:       link.map(|value| value.to_owned()),
+            dlink:      dlink.map(|value| value.to_owned()),
         }
+    }
+
+    fn resolve_link(&self, dlink_priority: bool) -> String {
+        if dlink_priority {
+            if let Some(dlink) = self.dlink.as_ref() {
+                return dlink.to_owned();
+            } else if let Some(link) = self.link.as_ref() {
+                return link.to_owned();
+            }
+        } else if let Some(link) = self.link.as_ref() {
+            return link.to_owned();
+        } else if let Some(dlink) = self.dlink.as_ref() {
+            return dlink.to_owned();
+        }
+        Default::default()
     }
 }
 
@@ -50,8 +66,13 @@ impl CurrentRepo {
         self.current.get(&show_title.0).unwrap()
     }
 
-    pub fn new_show(mut self, show_title: &str, link: &str) -> Result<(), &'static str> {
-        self.current.insert(show_title.to_owned(), Show::new(link));
+    pub fn new_show(
+        mut self,
+        show_title: &str,
+        link: Option<&String>,
+        dlink: Option<&String>,
+    ) -> Result<(), &'static str> {
+        self.current.insert(show_title.to_owned(), Show::new(link, dlink));
         self.save()
     }
 
@@ -68,24 +89,28 @@ impl CurrentRepo {
             .map(|show| show.episode.to_string().len())
             .max()
             .unwrap();
-        let biggest_download = self
-            .current
-            .values()
-            .map(|show| show.downloaded.to_string().len())
-            .max()
-            .unwrap();
-        let mut link = String::from("");
         for (show_title, show_obj) in self.current.iter() {
-            let title_diff = " ".repeat(longest_title - show_title.len());
-            let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
-            let download_diff = " ".repeat(biggest_download - show_obj.downloaded.to_string().len());
-            if should_links {
-                link = format!(" — {}", show_obj.link);
+            if !should_links {
+                let title_diff = " ".repeat(longest_title - show_title.len());
+                let episode_diff = " ".repeat(biggest_episode - show_obj.episode.to_string().len());
+                println!(
+                    "{show_title}{title_diff} — ep{}{episode_diff} — dn{}",
+                    show_obj.episode, show_obj.downloaded
+                );
+            } else {
+                const LONG_SEPARATOR: &str = "  ";
+                println!("{show_title} — ep{} — dn{}", show_obj.episode, show_obj.downloaded);
+                if let Some(link) = show_obj.link.as_ref() {
+                    println!("{0}link: {1}", LONG_SEPARATOR, link);
+                } else {
+                    println!("{0}link: empty", LONG_SEPARATOR);
+                }
+                if let Some(dlink) = show_obj.dlink.as_ref() {
+                    println!("{0}dlink: {1}", LONG_SEPARATOR, dlink);
+                } else {
+                    println!("{0}dlink: empty", LONG_SEPARATOR);
+                }
             };
-            println!(
-                "{show_title}{title_diff} — ep{}{episode_diff} — dn{}{download_diff}{}",
-                show_obj.episode, show_obj.downloaded, link
-            );
         }
         Ok(())
     }
@@ -113,14 +138,23 @@ impl CurrentRepo {
         self.save()
     }
 
-    pub fn change_link(mut self, show_title: &ValidatedTitle, new_link: &str) -> Result<(), &'static str> {
-        self.get_mut_show(show_title).link = new_link.to_owned();
+    pub fn change_link(
+        mut self,
+        show_title: &ValidatedTitle,
+        new_link: &str,
+        is_dlink: bool,
+    ) -> Result<(), &'static str> {
+        if is_dlink {
+            self.get_mut_show(show_title).dlink = Some(new_link.to_owned());
+        } else {
+            self.get_mut_show(show_title).link = Some(new_link.to_owned());
+        }
         self.save()
     }
 
     pub fn get_next_episode_link(&self, show_title: &ValidatedTitle) -> String {
         let show = self.get_show(show_title);
-        format!("{}{}", show.link, show.episode + 1)
+        format!("{}{}", show.resolve_link(false), show.episode + 1)
     }
 
     pub fn open_next_episode_link(&self, show_title: &ValidatedTitle) -> Result<(), String> {
@@ -130,7 +164,7 @@ impl CurrentRepo {
 
     pub fn get_next_download_link(&self, show_title: &ValidatedTitle) -> String {
         let show = self.get_show(show_title);
-        format!("{}{}", show.link, show.downloaded + 1)
+        format!("{}{}", show.resolve_link(true), show.downloaded + 1)
     }
 
     pub fn open_next_download_link(&self, show_title: &ValidatedTitle) -> Result<(), String> {
@@ -138,14 +172,14 @@ impl CurrentRepo {
         Ok(())
     }
 
-    pub fn open_link(&self, show_title: &ValidatedTitle) -> Result<(), String> {
-        open_in_browser(&self.get_link(show_title))?;
+    pub fn open_link(&self, show_title: &ValidatedTitle, dlink: bool) -> Result<(), String> {
+        open_in_browser(&self.get_link(show_title, dlink))?;
         Ok(())
     }
 
-    pub fn get_link(&self, show_title: &ValidatedTitle) -> String {
+    pub fn get_link(&self, show_title: &ValidatedTitle, dlink: bool) -> String {
         let show = self.get_show(show_title);
-        show.link.to_string()
+        show.resolve_link(dlink).to_owned()
     }
 
     pub fn save(self) -> Result<(), &'static str> {
@@ -157,7 +191,8 @@ impl CurrentRepo {
             sorted_shows.insert(key, value);
         }
 
-        let yaml = serde_yaml::to_string(&sorted_shows).map_err(|_| "couldn't serialize current model into yaml")?;
+        let yaml =
+            serde_yaml::to_string(&sorted_shows).map_err(|_| "couldn't serialize current model into yaml")?;
         fs::write(self.file_path.as_path(), yaml).map_err(|_| "failed to write to current.yml") // we ensure the file exists on creation of the type
     }
 }
@@ -169,6 +204,7 @@ impl TryFrom<&Path> for CurrentRepo {
         let file = OpenOptions::new()
             .write(true)
             .create(true)
+            .truncate(false)
             .read(true)
             .open(file_path)
             .map_err(|_| "could not create and/or open current.yml for reading")?;
