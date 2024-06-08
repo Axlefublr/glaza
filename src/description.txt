@@ -15,16 +15,25 @@ Every show has multiple properties you can set.
 
 Both the episode and link are separated for streaming / downloading this way, so that you can track both of those separately. This is mostly useful with the `watch` and `save` subcommands, that let you open the next episode to either watch, or download.
 
-`watched.txt` contains a list of all the shows you finished watching, or dropped. New shows appear in this list thanks to `finish` and `drop` subcommands.
+Only the show title is required, every other property is optional.
+For example: if you don't need the link functionality, you can just use glaza to track the episodes.
+Additionally, whenever a download link is expected but you don't have one set, the streaming link will be used as a fallback. The opposite is true as well.
+So you only really need to set both if you plan to both stream and download a show, on different websites.
 
-`watch-later.txt` contains a list of shows you plan to watch. You can use `add` to add new shows, and `discard` to remove shows from that list.
+`watched.txt` contains a list of all the shows you finished watching, or dropped, with timestamps. New shows appear in this list thanks to `finish` and `drop` subcommands.
+
+`watch-later.txt` contains a list of shows you plan to watch. You can use `add` to add new shows, and `discard` to remove shows from that list. The `wl` will just print the contents of this file, letting you view what shows you plan to watch.
 
 A lot of subcommands take `show` as an argument.
-How it's interpreted is slightly different per subcommand, to make for a better user experience.
+`watch`, `save`, `plink`, `pdlink`, `remove`, `episode`, `save`, `link`, `discard` — all assume that the show already exists.
+The show argument is a pattern that is searched for in the show titles of current.yml (or watch-later.txt, if you use the --grab flag in one of: `start`, `finish`, `drop`) in this order:
+1. Case sensitive exact match.
+2. Case insensitive exact match.
+3. Case insensitive substring match.
+4. Case sensitive substring match.
+If after these steps no show matches, or too many shows match (more than one) — an error is printed, instead of doing anything.
 
-`watch`, `save`, `plink`, `pdlink`, `remove`, `episode`, `save`, `link`, `discard` —
-all assume that the show already exists. So the way it's interpreted:
-1. If `--index`/`-i` flag is present, it is used, ignoring the value specified for `show`.
-2. If the show title directly matches to an existing one, it is used
-3. Otherwise, the *first* one that matches is used. Keep in mind that the order of shows is the same as
-   the output of `shows` or `wl`, depending on what the subcommand is dealing with.
+`glaza` supports git with the `--git` flag. Whenever you execute a subcommand that writes to one of the data files, if you use the `--git` flag, a commit will be automatically created for you.
+The commit messages are different per subcommand, and usually use the show title + extra information to make the git log more useful and searchable.
+The data directory is automatically `git init`ed if it isn't already.
+This functionality is most useful for backing up your tracking and sharing it by uploading it to a git remote.

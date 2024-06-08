@@ -14,7 +14,7 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum UserCommands {
-    /// List all the shows you're currently watching.
+    /// List all the shows you're currently watching, with their episode information.
     #[command(visible_alias = "s")]
     Shows {
         /// Display the links of each show as well.
@@ -48,7 +48,6 @@ pub enum UserCommands {
     /// Print the episode link of a show.
     /// This is most useful for shows that don't support `watch` due to
     /// having non-standard urls.
-    #[command(visible_alias = "h")]
     Plink {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
@@ -70,9 +69,6 @@ pub enum UserCommands {
     /// Set the episode you just downloaded.
     #[command(visible_alias = "dn")]
     Download { show: String, episode: u32 },
-    /// Start a new show, putting it in your ‘currently watching’ list.
-    #[command(visible_alias = "new")]
-    #[command(visible_alias = "n")]
     /// Update the episode link of a show.
     /// It will be used for the `watch` and `plink` subcommands.
     /// And also, as a fallback if you don't define a download link.
@@ -82,6 +78,9 @@ pub enum UserCommands {
     /// It will be used for the `save` and `pdlink` subcommands.
     /// And also, as a fallback if you don't define an episode link.
     Dlink { show: String, link: String },
+    /// Start a new show, putting it in your ‘currently watching’ list.
+    #[command(visible_alias = "new")]
+    #[command(visible_alias = "n")]
     Start {
         show:  String,
         /// Optional link to where you're going to be watching the show.
@@ -117,7 +116,7 @@ pub enum UserCommands {
         /// Ignore the current list and take the show title literally.
         /// This flag is like doing `start` and then `finish` immediately.
         /// Useful for movies, where you generally start and finish a "show" at the same time,
-        /// where adding it to the current list with `start` first makes no sense.
+        /// and adding it to the current list with `start` first makes no sense.
         /// If `--grab`/`-g` is specified, this flag is ignored.
         #[arg(short, long)]
         fresh: bool,
@@ -138,7 +137,7 @@ pub enum UserCommands {
         /// Ignore the current list and take the show title literally.
         /// This flag is like doing `start` and then `finish` immediately.
         /// Useful for movies, where you generally start and finish a "show" at the same time,
-        /// where adding it to the current list with `start` first makes no sense.
+        /// and adding it to the current list with `start` first makes no sense.
         /// If `--grab`/`-g` is specified, this flag is ignored.
         #[arg(short, long)]
         fresh: bool,
