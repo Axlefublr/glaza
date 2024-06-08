@@ -1,17 +1,9 @@
 use clap::Parser;
 use clap::Subcommand;
 
-/// A lot of subcommands take `show` as an argument.
-/// How it's interpreted is slightly different per subcommand, to make for a
-/// better user experience.
-/// `go`, `download`, `where`, `remove`, `episode`, `save`, `link`, `discard` —
-/// all assume that the show already exists. So the way it's interpreted:
-/// 1. If `--index`/`-i` flag is present, it is used, ignoring the value specified for `show`.
-/// 2. If the show title directly matches to an existing one, it is used
-/// 3. Otherwise, the *first* one that matches is used. Keep in mind that the order of shows is the same as
-///    the output of `shows` or `wl`, depending on what the subcommand is dealing with.
 #[derive(Parser)]
-#[command(author, version, about)]
+#[command(author, version)]
+#[command(about = std::include_str!("description.txt"))]
 pub struct Args {
     #[command(subcommand)]
     pub action: UserCommands,
@@ -22,6 +14,13 @@ pub struct Args {
 
 #[derive(Subcommand)]
 pub enum UserCommands {
+    /// List all the shows you're currently watching.
+    #[command(visible_alias = "s")]
+    Shows {
+        /// Display the links of each show as well.
+        #[arg(short, long)]
+        links: bool,
+    },
     /// Print the next episode's link.
     /// This works by appending the watched episode numer + 1 onto the link.
     /// This won't work if a number appended on the link doesn't result in that
@@ -50,7 +49,7 @@ pub enum UserCommands {
     /// This is most useful for shows that don't support `watch` due to
     /// having non-standard urls.
     #[command(visible_alias = "h")]
-    PLink {
+    Plink {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
@@ -59,11 +58,52 @@ pub enum UserCommands {
     /// Print the download link of a show.
     /// This is most useful for shows that don't support `save` due to
     /// having non-standard urls.
-    PDLink {
+    Pdlink {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
         web:  bool,
+    },
+    /// Set the episode you just watched.
+    #[command(visible_alias = "ep")]
+    Episode { show: String, episode: u32 },
+    /// Set the episode you just downloaded.
+    #[command(visible_alias = "dn")]
+    Download { show: String, episode: u32 },
+    /// Start a new show, putting it in your ‘currently watching’ list.
+    #[command(visible_alias = "new")]
+    #[command(visible_alias = "n")]
+    /// Update the episode link of a show.
+    /// It will be used for the `watch` and `plink` subcommands.
+    /// And also, as a fallback if you don't define a download link.
+    #[command(visible_alias = "ln")]
+    Link { show: String, link: String },
+    /// Update the download link of a show.
+    /// It will be used for the `save` and `pdlink` subcommands.
+    /// And also, as a fallback if you don't define an episode link.
+    Dlink { show: String, link: String },
+    Start {
+        show:  String,
+        /// Optional link to where you're going to be watching the show.
+        /// If you want to make use of the `watch` subcommand, cut the
+        /// link so that if you appended a number after it, you'd get the
+        /// link to that episode. Not all links work like that, in which
+        /// case the feature will be unavailable.
+        /// If this link is the only one set, it will be used as a fallback
+        /// for when subcommands expect a download link.
+        #[arg(short, long)]
+        link:  Option<String>,
+        /// Same as the `link` flag, but for the download link instead.
+        /// This link is used for the `save` subcommand.
+        /// If this link is the only one set, it will be used as a fallback
+        /// for when subcommands expect an episode link.
+        #[arg(short, long)]
+        dlink: Option<String>,
+        /// Remove the show from the watch later list, if it's there.
+        /// If it's not there, return an error.
+        /// This is to help you realize if you misspelled a show title.
+        #[arg(short, long)]
+        grab:  bool,
     },
     /// Finish a show, putting it in your watched list.
     #[command(visible_alias = "f")]
@@ -103,60 +143,12 @@ pub enum UserCommands {
         #[arg(short, long)]
         fresh: bool,
     },
-    /// Start a new show, putting it in your ‘currently watching’ list.
-    #[command(visible_alias = "new")]
-    #[command(visible_alias = "n")]
-    Start {
-        show: String,
-        /// Optional link to where you're going to be watching the show.
-        /// If you want to make use of the `watch` subcommand, cut the
-        /// link so that if you appended a number after it, you'd get the
-        /// link to that episode. Not all links work like that, in which
-        /// case the feature will be unavailable.
-        /// If this link is the only one set, it will be used as a fallback
-        /// for when subcommands expect a download link.
-        #[arg(short, long)]
-        link: Option<String>,
-        /// Same as the `link` flag, but for the download link instead.
-        /// This link is used for the `save` subcommand.
-        /// If this link is the only one set, it will be used as a fallback
-        /// for when subcommands expect an episode link.
-        #[arg(short, long)]
-        dlink: Option<String>,
-        /// Remove the show from the watch later list, if it's there.
-        /// If it's not there, return an error.
-        /// This is to help you realize if you misspelled a show title.
-        #[arg(short, long)]
-        grab: bool,
-    },
-    /// List all the shows you're currently watching.
-    #[command(visible_alias = "s")]
-    Shows {
-        /// Display the links of each show as well.
-        #[arg(short, long)]
-        links: bool,
-    },
     /// Remove a show from the list without putting it in your watched list.
     /// This is useful if you accidentally added a show you didn't mean to,
     /// possibly due to misspelling its title.
     #[command(visible_alias = "rm")]
     #[command(visible_alias = "delete")]
     Remove { show: String },
-    /// Set the episode you just watched.
-    #[command(visible_alias = "ep")]
-    Episode { show: String, episode: u32 },
-    /// Set the episode you just downloaded.
-    #[command(visible_alias = "dn")]
-    Download { show: String, episode: u32 },
-    /// Update the episode link of a show.
-    /// It will be used for the `watch` and `plink` subcommands.
-    /// And also, as a fallback if you don't define a download link.
-    #[command(visible_alias = "ln")]
-    Link { show: String, link: String },
-    /// Update the download link of a show.
-    /// It will be used for the `save` and `pdlink` subcommands.
-    /// And also, as a fallback if you don't define an episode link.
-    DLink { show: String, link: String },
     /// Add a new show to your watch later list.
     #[command(visible_alias = "later")]
     #[command(visible_alias = "a")]

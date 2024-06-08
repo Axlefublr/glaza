@@ -81,8 +81,7 @@ impl CurrentRepo {
             Some(length) => length,
             None => return Err("you have no shows you're currently watching"),
         };
-        // this unwrap is safe because we just confirmed the iterator wouldn't be
-        // empty
+        // this unwrap is safe because we just confirmed the iterator wouldn't be empty
         let biggest_episode = self
             .current
             .values()
@@ -99,7 +98,10 @@ impl CurrentRepo {
                 );
             } else {
                 const LONG_SEPARATOR: &str = "  ";
-                println!("{show_title} — ep{} — dn{}", show_obj.episode, show_obj.downloaded);
+                println!(
+                    "{show_title} — ep{} — dn{}",
+                    show_obj.episode, show_obj.downloaded
+                );
                 if let Some(link) = show_obj.link.as_ref() {
                     println!("{0}link: {1}", LONG_SEPARATOR, link);
                 } else {

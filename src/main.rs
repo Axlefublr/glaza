@@ -51,7 +51,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             }
             Ok(())
         },
-        UserCommands::PLink { show, web } => {
+        UserCommands::Plink { show, web } => {
             let show = current_model.normalize_show_pattern(&show)?;
             if web {
                 current_model.open_link(&show, false)?;
@@ -60,7 +60,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             }
             Ok(())
         },
-        UserCommands::PDLink { show, web } => {
+        UserCommands::Pdlink { show, web } => {
             let show = current_model.normalize_show_pattern(&show)?;
             if web {
                 current_model.open_link(&show, true)?;
@@ -105,7 +105,12 @@ fn _main() -> Result<(), Box<dyn Error>> {
             }
             Ok(())
         },
-        UserCommands::Start { show, link, dlink, grab } => {
+        UserCommands::Start {
+            show,
+            link,
+            dlink,
+            grab,
+        } => {
             let show: String = if grab {
                 let show = wl_model.normalize_show_pattern(&show)?;
                 wl_model.remove(&show)?;
@@ -152,7 +157,7 @@ fn _main() -> Result<(), Box<dyn Error>> {
             }
             Ok(())
         },
-        UserCommands::DLink { show, link } => {
+        UserCommands::Dlink { show, link } => {
             let show = current_model.normalize_show_pattern(&show)?;
             current_model.change_link(&show, &link, true)?;
             if args.git {

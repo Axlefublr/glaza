@@ -1,0 +1,30 @@
+`glaza` is a program for tracking the shows you watch.
+
+All of the information is kept in three files in your data_directory/glaza, which is:
+linux — $XDG_DATA_HOME/glaza
+macos — $HOME/Library/Application Support/glaza
+windows — %APPDATA%/glaza
+
+`current.yml` contains the information about shows you're currently in the process of watching.
+Every show has multiple properties you can set.
+1. Show title
+2. The episode number of the latest episode you finished watching
+3. The episode number of the latest episode you *downloaded*
+4. The link to where you watch (stream) the show
+5. The link to where you *download* the show
+
+Both the episode and link are separated for streaming / downloading this way, so that you can track both of those separately. This is mostly useful with the `watch` and `save` subcommands, that let you open the next episode to either watch, or download.
+
+`watched.txt` contains a list of all the shows you finished watching, or dropped. New shows appear in this list thanks to `finish` and `drop` subcommands.
+
+`watch-later.txt` contains a list of shows you plan to watch. You can use `add` to add new shows, and `discard` to remove shows from that list.
+
+A lot of subcommands take `show` as an argument.
+How it's interpreted is slightly different per subcommand, to make for a better user experience.
+
+`watch`, `save`, `plink`, `pdlink`, `remove`, `episode`, `save`, `link`, `discard` —
+all assume that the show already exists. So the way it's interpreted:
+1. If `--index`/`-i` flag is present, it is used, ignoring the value specified for `show`.
+2. If the show title directly matches to an existing one, it is used
+3. Otherwise, the *first* one that matches is used. Keep in mind that the order of shows is the same as
+   the output of `shows` or `wl`, depending on what the subcommand is dealing with.
