@@ -48,6 +48,7 @@ pub enum UserCommands {
     /// Print the episode link of a show.
     /// This is most useful for shows that don't support `watch` due to
     /// having non-standard urls.
+    #[command(visible_alias = "ln")]
     Plink {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
@@ -57,6 +58,7 @@ pub enum UserCommands {
     /// Print the download link of a show.
     /// This is most useful for shows that don't support `save` due to
     /// having non-standard urls.
+    #[command(visible_alias = "dln")]
     Pdlink {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
@@ -72,7 +74,6 @@ pub enum UserCommands {
     /// Update the episode link of a show.
     /// It will be used for the `watch` and `plink` subcommands.
     /// And also, as a fallback if you don't define a download link.
-    #[command(visible_alias = "ln")]
     Link { show: String, link: String },
     /// Update the download link of a show.
     /// It will be used for the `save` and `pdlink` subcommands.
@@ -123,9 +124,11 @@ pub enum UserCommands {
     },
     /// Drop a show, putting it in your watched list.
     /// The distinction from `finish` is that to the left of the show name in
-    /// your watched list, there will be the `(dropped)` specifier.
+    /// your watched list, there will be the `(dropped at ep N)` specifier.
+    /// Where `N` is the latest episode that the show was on, defaulting to 0.
     /// Also with the `--git` flag, the commit message will say "drop" instead of
     /// "finish".
+    /// The commit message also reflects the episode that the show was dropped on.
     #[command(visible_alias = "d")]
     Drop {
         show:  String,

@@ -159,74 +159,92 @@ Every show has multiple properties you can set.
 4. The link to where you watch (stream) the show
 5. The link to where you *download* the show
 
-Both the episode and link are separated for streaming / downloading this way, so that you can track both of those
-separately. This is mostly useful with the `watch` and `save` subcommands, that let you open the next episode to
-either watch, or download.
+Both the episode and link are separated for streaming / downloading this way, so that you can track both of
+those separately. This is mostly useful with the `watch` and `save` subcommands, that let you open the next
+episode to either watch, or download.
 
 Only the show title is required, every other property is optional.
 For example: if you don't need the link functionality, you can just use glaza to track the episodes.
-Additionally, whenever a download link is expected but you don't have one set, the streaming link will be used as a
-fallback. The opposite is true as well.
+Additionally, whenever a download link is expected but you don't have one set, the streaming link will be used
+as a fallback. The opposite is true as well.
 So you only really need to set both if you plan to both stream and download a show, on different websites.
 
-`watched.txt` contains a list of all the shows you finished watching, or dropped, with timestamps. New shows appear in
-this list thanks to `finish` and `drop` subcommands.
+`watched.txt` contains a list of all the shows you finished watching, or dropped, with timestamps. New shows
+appear in this list thanks to `finish` and `drop` subcommands.
 
-`watch-later.txt` contains a list of shows you plan to watch. You can use `add` to add new shows, and `discard` to
-remove shows from that list. The `wl` will just print the contents of this file, letting you view what shows you plan
-to watch.
+`watch-later.txt` contains a list of shows you plan to watch. You can use `add` to add new shows, and `discard`
+to remove shows from that list. The `wl` will just print the contents of this file, letting you view what shows
+you plan to watch.
 
 A lot of subcommands take `show` as an argument.
-`watch`, `save`, `plink`, `pdlink`, `remove`, `episode`, `save`, `link`, `discard` — all assume that the show already
-exists.
-The show argument is a pattern that is searched for in the show titles of current.yml (or watch-later.txt, if you use
-the --grab flag in one of: `start`, `finish`, `drop`) in this order:
+`watch`, `save`, `plink`, `pdlink`, `remove`, `episode`, `save`, `link`, `discard` — all assume that the show
+already exists.
+The show argument is a pattern that is searched for in the show titles of current.yml (or watch-later.txt, if
+you use the --grab flag in one of: `start`, `finish`, `drop`) in this order:
 1. Case sensitive exact match.
 2. Case insensitive exact match.
 3. Case insensitive substring match.
 4. Case sensitive substring match.
-If after these steps no show matches, or too many shows match (more than one) — an error is printed, instead of doing
-anything.
+If after these steps no show matches, or too many shows match (more than one) — an error is printed, instead of
+doing anything.
 
-`glaza` supports git with the `--git` flag. Whenever you execute a subcommand that writes to one of the data files, if
-you use the `--git` flag, a commit will be automatically created for you.
-The commit messages are different per subcommand, and usually use the show title + extra information to make the git
-log more useful and searchable.
+`glaza` supports git with the `--git` flag. Whenever you execute a subcommand that writes to one of the data
+files, if you use the `--git` flag, a commit will be automatically created for you.
+The commit messages are different per subcommand, and usually use the show title + extra information to make the
+git log more useful and searchable.
 The data directory is automatically `git init`ed if it isn't already.
 This functionality is most useful for backing up your tracking and sharing it by uploading it to a git remote.
 
 Usage: glaza [OPTIONS] <COMMAND>
 
 Commands:
-  shows     List all the shows you're currently watching, with their episode information [aliases: s]
-  watch     Print the next episode's link. This works by appending the watched episode numer + 1 onto the link.
-                This won't work if a number appended on the link doesn't result in that episode's url [aliases: next,
-                go, w]
-  save      Print the next download link. Works the same as the `watch` subcommand, except the `saved` episode is
-                appended instead [aliases: install, i]
-  plink     Print the episode link of a show. This is most useful for shows that don't support `watch` due to
-                having non-standard urls
-  pdlink    Print the download link of a show. This is most useful for shows that don't support `save` due to
-                having non-standard urls
-  episode   Set the episode you just watched [aliases: ep]
-  download  Set the episode you just downloaded [aliases: dn]
-  link      Update the episode link of a show. It will be used for the `watch` and `plink` subcommands. And also,
-                as a fallback if you don't define a download link [aliases: ln]
-  dlink     Update the download link of a show. It will be used for the `save` and `pdlink` subcommands. And also,
-                as a fallback if you don't define an episode link
-  start     Start a new show, putting it in your ‘currently watching’ list [aliases: new, n]
-  finish    Finish a show, putting it in your watched list [aliases: f]
-  drop      Drop a show, putting it in your watched list. The distinction from `finish` is that to the left of the
-                show name in your watched list, there will be the `(dropped)` specifier. Also with the `--git` flag,
-                the commit message will say "drop" instead of "finish" [aliases: d]
-  remove    Remove a show from the list without putting it in your watched list. This is useful if you
-                accidentally added a show you didn't mean to, possibly due to misspelling its title [aliases: rm,
-                delete]
-  add       Add a new show to your watch later list [aliases: later, a]
-  discard   Remove a show from your watch later list [aliases: c]
-  wl        Print the entire contents of your watch later file
-  watched   Print the entire contents of your watched list [aliases: past]
-  help      Print this message or the help of the given subcommand(s)
+shows     List all the shows you're currently watching, with their episode information
+          [aliases: s]
+watch     Print the next episode's link.
+          This works by appending the watched episode numer + 1 onto the link.
+          This won't work if a number appended on the link doesn't result in that episode's url
+          [aliases: next, go, w]
+save      Print the next download link.
+          Works the same as the `watch` subcommand, except the `saved` episode is appended instead
+          [aliases: install, i]
+plink     Print the episode link of a show.
+          This is most useful for shows that don't support `watch` due to having non-standard urls
+          [aliases: ln]
+pdlink    Print the download link of a show.
+          This is most useful for shows that don't support `save` due to having non-standard urls
+          [aliases: dln]
+episode   Set the episode you just watched
+          [aliases: ep]
+download  Set the episode you just downloaded
+          [aliases: dn]
+link      Update the episode link of a show. It will be used for the `watch` and `plink` subcommands.
+          And also, as a fallback if you don't define a download link
+dlink     Update the download link of a show.
+          It will be used for the `save` and `pdlink` subcommands.
+          And also, as a fallback if you don't define an episode link
+start     Start a new show, putting it in your ‘currently watching’ list
+          [aliases: new, n]
+finish    Finish a show, putting it in your watched list
+          [aliases: f]
+drop      Drop a show, putting it in your watched list.
+          The distinction from `finish` is that to the left of the show name in your watched list,
+          there will be the `(dropped at ep N)` specifier.
+          Where `N` is the latest episode that the show was on, defaulting to 0.
+          Also with the `--git` flag, the commit message will say "drop" instead of "finish".
+          The commit message also reflects the episode that the show was dropped on
+          [aliases: d]
+remove    Remove a show from the list without putting it in your watched list.
+          This is useful if you accidentally added a show you didn't mean to,
+          possibly due to misspelling its title
+          [aliases: rm, delete]
+add       Add a new show to your watch later list
+          [aliases: later, a]
+discard   Remove a show from your watch later list
+          [aliases: c]
+wl        Print the entire contents of your watch later file
+watched   Print the entire contents of your watched list
+          [aliases: past]
+help      Print this message or the help of the given subcommand(s)
 
 Options:
   -g, --git      If the action writes to a file, commit that change
