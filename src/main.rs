@@ -88,20 +88,24 @@ fn _main() -> Result<(), Box<dyn Error>> {
             Ok(())
         },
         UserCommands::Drop { show, grab, fresh } => {
+            let latest_episode;
             let show: String = if grab {
                 let show = wl_model.normalize_show_pattern(&show)?;
+                latest_episode = current_model.get_episode(&show);
                 wl_model.remove(&show)?;
                 show.into()
             } else if !fresh {
                 let show = current_model.normalize_show_pattern(&show)?;
+                latest_episode = current_model.get_episode(&show);
                 current_model.remove(&show)?;
                 show.into()
             } else {
+                latest_episode = 0;
                 show
             };
-            watched_model.drop(&show)?;
+            watched_model.drop(latest_episode, &show)?;
             if args.git {
-                git_add_commit(&data.data_dir, format!("drop -> {show}"))?;
+                git_add_commit(&data.data_dir, format!("drop at {latest_episode} -> {show}"))?;
             }
             Ok(())
         },

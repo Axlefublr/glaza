@@ -154,6 +154,14 @@ impl CurrentRepo {
         self.save()
     }
 
+    pub fn get_episode(&self, show_title: &ValidatedTitle) -> u32 {
+        self.get_show(show_title).episode
+    }
+
+    pub fn get_downloaded(&self, show_title: &ValidatedTitle) -> u32 {
+        self.get_show(show_title).downloaded
+    }
+
     pub fn get_next_episode_link(&self, show_title: &ValidatedTitle) -> String {
         let show = self.get_show(show_title);
         format!("{}{}", show.resolve_link(false), show.episode + 1)

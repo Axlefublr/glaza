@@ -32,8 +32,8 @@ impl WatchedRepo {
         self.append_show(show)
     }
 
-    pub fn drop(&mut self, show: &str) -> Result<(), &'static str> {
-        self.append_show(&format!("(dropped) {}", show))
+    pub fn drop(&mut self, latest_episode: u32, show: &str) -> Result<(), &'static str> {
+        self.append_show(&format!("(dropped at ep {}) {}", latest_episode, show))
     }
 }
 
