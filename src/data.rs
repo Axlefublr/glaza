@@ -12,10 +12,10 @@ const WATCH_LATER_FILE: &str = "watch-later.txt";
 
 #[derive(Debug)]
 pub struct DataFiles {
-    pub current:     PathBuf,
-    pub watched:     PathBuf,
+    pub current: PathBuf,
+    pub watched: PathBuf,
     pub watch_later: PathBuf,
-    pub data_dir:    PathBuf,
+    pub data_dir: PathBuf,
 }
 
 impl DataFiles {

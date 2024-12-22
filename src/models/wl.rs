@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use super::ValidatedTitle;
 
 pub struct WlRepo {
-    contents:  String,
+    contents: String,
     file_path: PathBuf,
 }
 

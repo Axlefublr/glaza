@@ -16,19 +16,19 @@ type Shows = HashMap<String, Show>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Show {
-    pub episode:    u32,
+    pub episode: u32,
     pub downloaded: u32,
-    pub link:       Option<String>,
-    pub dlink:      Option<String>,
+    pub link: Option<String>,
+    pub dlink: Option<String>,
 }
 
 impl Show {
     pub fn new(link: Option<&String>, dlink: Option<&String>) -> Self {
         Self {
-            episode:    0,
+            episode: 0,
             downloaded: 0,
-            link:       link.map(|value| value.to_owned()),
-            dlink:      dlink.map(|value| value.to_owned()),
+            link: link.map(|value| value.to_owned()),
+            dlink: dlink.map(|value| value.to_owned()),
         }
     }
 
@@ -49,7 +49,7 @@ impl Show {
 }
 
 pub struct CurrentRepo {
-    current:   Shows,
+    current: Shows,
     file_path: PathBuf,
 }
 

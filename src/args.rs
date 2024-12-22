@@ -9,7 +9,7 @@ pub struct Args {
     pub action: UserCommands,
     /// If the action writes to a file, commit that change
     #[arg(short, long)]
-    pub git:    bool,
+    pub git: bool,
 }
 
 #[derive(Subcommand)]
@@ -32,7 +32,7 @@ pub enum UserCommands {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
-        web:  bool,
+        web: bool,
     },
     /// Print the next download link.
     /// Works the same as the `watch` subcommand, except the `saved` episode is
@@ -43,7 +43,7 @@ pub enum UserCommands {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
-        web:  bool,
+        web: bool,
     },
     /// Print the episode link of a show.
     /// This is most useful for shows that don't support `watch` due to
@@ -53,7 +53,7 @@ pub enum UserCommands {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
-        web:  bool,
+        web: bool,
     },
     /// Print the download link of a show.
     /// This is most useful for shows that don't support `save` due to
@@ -63,7 +63,7 @@ pub enum UserCommands {
         show: String,
         /// Open the link in your $BROWSER instead of printing it.
         #[arg(short, long)]
-        web:  bool,
+        web: bool,
     },
     /// Set the episode you just watched.
     #[command(visible_alias = "ep")]
@@ -83,7 +83,7 @@ pub enum UserCommands {
     #[command(visible_alias = "new")]
     #[command(visible_alias = "n")]
     Start {
-        show:  String,
+        show: String,
         /// Optional link to where you're going to be watching the show.
         /// If you want to make use of the `watch` subcommand, cut the
         /// link so that if you appended a number after it, you'd get the
@@ -92,7 +92,7 @@ pub enum UserCommands {
         /// If this link is the only one set, it will be used as a fallback
         /// for when subcommands expect a download link.
         #[arg(short, long)]
-        link:  Option<String>,
+        link: Option<String>,
         /// Same as the `link` flag, but for the download link instead.
         /// This link is used for the `save` subcommand.
         /// If this link is the only one set, it will be used as a fallback
@@ -103,17 +103,17 @@ pub enum UserCommands {
         /// If it's not there, return an error.
         /// This is to help you realize if you misspelled a show title.
         #[arg(short, long)]
-        grab:  bool,
+        grab: bool,
     },
     /// Finish a show, putting it in your watched list.
     #[command(visible_alias = "f")]
     Finish {
-        show:  String,
+        show: String,
         /// Remove the show from the watch later list, instead of the current list.
         /// If it's not there, return an error.
         /// This is to help you realize if you misspelled a show title.
         #[arg(short, long)]
-        grab:  bool,
+        grab: bool,
         /// Ignore the current list and take the show title literally.
         /// This flag is like doing `start` and then `finish` immediately.
         /// Useful for movies, where you generally start and finish a "show" at the same time,
@@ -131,12 +131,12 @@ pub enum UserCommands {
     /// The commit message also reflects the episode that the show was dropped on.
     #[command(visible_alias = "d")]
     Drop {
-        show:  String,
+        show: String,
         /// Remove the show from the watch later list, instead of the current list.
         /// If it's not there, return an error.
         /// This is to help you realize if you misspelled a show title.
         #[arg(short, long)]
-        grab:  bool,
+        grab: bool,
         /// Ignore the current list and take the show title literally.
         /// This flag is like doing `start` and then `finish` immediately.
         /// Useful for movies, where you generally start and finish a "show" at the same time,
